@@ -8,10 +8,10 @@ public class Memory {
 	public Memory(int c, int base, ArrayList<String> inst, ArrayList<String> d){
 		cycles = c;
 		this.base = base;
-		for(int i = 0; i<inst.size();i++){
+		for(int i = 0; i< inst.size(); i++){
 			instructions.add(Helper.stringToInstruction(inst.get(i)));
 		}
-		for(int i = 0; i<d.size();i++){
+		for(int i = 0; i< d.size(); i++){
 			data.add(d.get(i));
 		}
 	}
@@ -24,5 +24,4 @@ public class Memory {
 	public String loadData(int index){
 		return data.get(index - base);
 	}
-	
 }
