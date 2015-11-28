@@ -15,12 +15,15 @@ public class Memory {
 			data.add(d.get(i));
 		}
 	}
+	
 	public void storeData(int index, String d){
 		data.add(index - base, d);
 	}
+	
 	public Instruction loadInstruction(int index){
 		return instructions.get(index - base);
 	}
+	
 	public String loadData(int index){
 		return data.get(index - base);
 	}
