@@ -1,6 +1,6 @@
 
 public class Instruction {
-	Type type ;
+	Type type;
 	int regA;
 	int regB;
 	int imm;
@@ -10,5 +10,4 @@ public class Instruction {
 		this.regB = rB;
 		this.imm = imm;
 	}
-
 }

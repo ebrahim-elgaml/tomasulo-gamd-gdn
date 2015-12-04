@@ -7,11 +7,13 @@ public class Cache {
 	int cacheSize;
 	int lineSize;
 	int associativity;
+	Type type;
 	WritePolicy writePolicy;
 	
 	Cache next;
 	static Memory memory;
 	
+	enum Type { INSTRUCTION, DATA }
 	enum WritePolicy { WRITE_THROUGH, WRITE_BACK };
 	
 	int offsetSize;
@@ -41,45 +43,14 @@ public class Cache {
 			this.tag = tag;
 			this.data = data;
 		}
-
-		public boolean isValid() {
-			return valid;
-		}
-
-		public void setValid(boolean valid) {
-			this.valid = valid;
-		}
-
-		public boolean isDirty() {
-			return dirty;
-		}
-
-		public void setDirty(boolean dirty) {
-			this.dirty = dirty;
-		}
-
-		public int getTag() {
-			return tag;
-		}
-
-		public void setTag(int tag) {
-			this.tag = tag;
-		}
-
-		public String getData() {
-			return data;
-		}
-
-		public void setData(String data) {
-			this.data = data;
-		}
 	}
 	
-	public Cache(int cycles, int cacheSize, int lineSize, int associativity, WritePolicy writePolicy) {
+	public Cache(int cycles, int cacheSize, int lineSize, int associativity, Type type, WritePolicy writePolicy) {
 		this.cycles = cycles;
 		this.cacheSize = cacheSize;
 		this.lineSize = lineSize;
 		this.associativity = associativity;
+		this.type = type;
 		this.writePolicy = writePolicy;
 		sets = new ArrayList<ArrayList<Row>>(cacheSize / (lineSize * associativity));
 		offsetSize = (int) (Math.log(lineSize) / Math.log(2));
@@ -95,15 +66,17 @@ public class Cache {
 		ArrayList<Row> set = sets.get(index);
 		for (int i = 0; i < set.size(); ++i) {
 			Row row = set.get(i);
-			if (row.getTag() == tag) {
-				return new Pair<>(row.getData().substring(2 * offset, 2 * (offset + 1)), time);
+			if (row.tag == tag) {
+				return new Pair<>(row.data.substring(2 * offset, 2 * (offset + 1)), time);
 			}
 		}
 		if (next != null) {
 			return next.read(address);
 		}
-		//TODO memory
-		return new Pair<>(memory.loadData(address), time + memory.cycles);
+		if(type == type.DATA) {
+			return new Pair<>(memory.loadData(address), time + memory.cycles);
+		}
+		//return new Pair<>(memory.loadInstruction(address), time + memory.cycles);
 	}
 	
 	public void write(int address, String data) {
@@ -113,33 +86,39 @@ public class Cache {
 		ArrayList<Row> set = sets.get(index);
 		for (int i = 0; i < set.size(); ++i) {
 			Row row = set.get(i);
-			if (row.getTag() == -1) {
-				row.setValid(true);
-				row.setDirty(true);
-				row.setTag(tag);
-				row.setData(data);
+			if (row.tag == -1) {
+				row.valid = true;
+				row.dirty = true;
+				row.tag = tag;
+				row.data = data;
 				return;
 			}
 		}
-		if (set.get(0).isDirty()) {
-			int oldAddress = set.get(0).getTag() << (indexSize + offsetSize);
+		if (set.get(0).dirty) {
+			int oldAddress = set.get(0).tag << (indexSize + offsetSize);
 			if (next != null) {
-				next.write(oldAddress, set.get(0).getData());
+				next.write(oldAddress, set.get(0).data);
 			} else {
 				time += memory.cycles;
-				memory.storeData(oldAddress, set.get(0).getData());
+				if(type == type.DATA){
+					memory.storeData(oldAddress, set.get(0).data);
+				}
+				
 			}
 		}
-		set.get(0).setValid(true);
-		set.get(0).setDirty(true);
-		set.get(0).setTag(tag);
-		set.get(0).setData(data);
+		set.get(0).valid = true;
+		set.get(0).dirty = true;
+		set.get(0).tag = tag;
+		set.get(0).data = data;
 		if (writePolicy == WritePolicy.WRITE_THROUGH) {
 			if (next != null) {
 				next.write(address, data);
 			} else {
 				time += memory.cycles;
-				memory.storeData(address, data);
+				if(type == type.DATA){
+					memory.storeData(address, data);
+				}
+				
 			}
 		}
 	}
