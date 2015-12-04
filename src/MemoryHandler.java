@@ -1,7 +1,5 @@
 import java.util.ArrayList;
 
-import javafx.util.Pair;
-
 public class MemoryHandler {
 	static Memory memory;
 	static Cache headCache;

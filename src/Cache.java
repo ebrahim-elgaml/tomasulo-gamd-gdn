@@ -1,6 +1,5 @@
 import java.util.ArrayList;
 
-import javafx.util.Pair;
 
 public class Cache {
 	int cycles;
