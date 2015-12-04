@@ -1,8 +1,5 @@
 import java.util.ArrayList;
 
-import javafx.util.Pair;
-import jdk.internal.org.objectweb.asm.Type;
-
 public class MemoryHandler {
 	static Memory memory;
 	static Cache dataCache, instructionCache;
