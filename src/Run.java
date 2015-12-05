@@ -2,7 +2,7 @@
 import java.util.ArrayList;
 
 public class Run {
-	int PC;
+	int PC , clock;
 	ArrayList<String> registersFile = new ArrayList<String>();
 	ArrayList<ArrayList<Stage>> julie = new ArrayList<ArrayList<Stage>>();
 	ArrayList<Integer> registerStatus = new ArrayList<Integer>();
@@ -29,19 +29,25 @@ public class Run {
 		}
 	}
 	//	LW, SW, JMP, BEQ, JALR, RET, ADD, SUB, ADDI, NAND, MUL;
-	public void Issue(Instruction I){
+	public boolean Issue(Instruction I){
 		//checking the type of the instruction
 		switch(I.type){
-		case LW :HandleLoad_Immediate(I);PC++;break;
-		case BEQ :HandleThreeOprands(I);setPC(I);break;
-		case SW :HandleStore(I);PC++;break;
-		case JMP :HandleJump(I);break;
-		case JALR :HandleJump_Link(I);break;
-		case RET :HandleReturn(I);break;
-		case ADD :HandleJump(I);PC++;break;
-		case NAND:HandleThreeOprands(I);PC++;break;
-		case MUL:HandleThreeOprands(I);PC++;break;
+		case LW : if(HandleLoad_Immediate(I)){PC++;return true;}else return false;
+		case BEQ : if(HandleThreeOprands(I,FunctionalUnits.ADD)){setPC(I);return true;}
+		else return false;
+		case SW :if(HandleStore(I)){PC++;return true;}
+		else return false;
+		case JMP :return HandleJump(I);
+		case JALR :return HandleJump_Link(I);
+		case RET :return HandleReturn(I);
+		case ADD :if(HandleThreeOprands(I,FunctionalUnits.ADD)){PC++;return true;}
+		else return false;
+		case NAND:if(HandleThreeOprands(I,FunctionalUnits.LOGICAL)){PC++;return true;}
+		else return false;
+		case MUL:if(HandleThreeOprands(I,FunctionalUnits.MULTIPLY)){PC++;return true;}
+		else return false;
 		}
+		return false;
 	}
 	// Branch prediction mechanism
 	public void setPC(Instruction I){
@@ -52,20 +58,23 @@ public class Run {
 
 	}
 	//Jump: branches to the address PC+1+regA+imm
-	public void HandleJump(Instruction I){
+	public boolean HandleJump(Instruction I){
 		PC=1+I.regA+I.imm;
+		return true;
 	}
 	//Jump and link register: Stores the value of PC+1 in regA and branches (unconditionally) to the address in regB.
-	public void HandleJump_Link(Instruction I){
+	public boolean HandleJump_Link(Instruction I){
 		I.regA = PC+1;
 		PC = I.regB;
+		return true;
 	}
-	public void HandleReturn(Instruction I){
+	public boolean HandleReturn(Instruction I){
 		PC = I.regA;
+		return true;
 	}
 	//Special case Instructions Load and Immediate value
 	//Assuming ScoreBoard Contains Hexadecimal value 
-	public void HandleLoad_Immediate(Instruction I){
+	public boolean HandleLoad_Immediate(Instruction I){
 		Type t = I.type;
 		int reservationStationNumber = (t.equals(Type.LW))?EmptyFunctionalUnit(FunctionalUnits.LOAD):
 			EmptyFunctionalUnit(FunctionalUnits.ADD);
@@ -74,6 +83,7 @@ public class Run {
 			int rs = I.regB;
 			int offset = I.imm;
 			int rd = I.regA;
+			boolean Issue = true;
 			RowROB current;
 			int ROBLOC = registerStatus.get(rs);
 			if(registerStatus.get(rs)!=-1){
@@ -84,7 +94,7 @@ public class Run {
 				else{
 					RS.qj = ROBLOC;
 					current = new RowROB(t, rd,0, false);
-					rob.push(current);
+					Issue = rob.push(current);
 				}
 			}
 			else{
@@ -93,13 +103,27 @@ public class Run {
 			}
 			RS.busy = true;
 			RS.destination = rd;
-			registerStatus.set(rd,ROBLOC);
 			RS.address = offset;
-			scoreboard.set(reservationStationNumber, RS);
+			if(Issue){
+				registerStatus.set(rd,ROBLOC);
+				scoreboard.set(reservationStationNumber, RS);
+			}
+			else
+				return false;
+			ArrayList<Stage> crrnt = julie.get(clock);
+			if(crrnt != null){
+				crrnt.set(I.number,Stage.ISSUE);
+			}
+			else{
+				crrnt = new ArrayList<Stage>();
+				crrnt.set(I.number,Stage.ISSUE);
+			}
+			return true;
 		}
+		return false;
 	}
 	//special case of issuing Store
-	public void HandleStore(Instruction I){
+	public boolean  HandleStore(Instruction I){
 		int reservationStationNumber =EmptyFunctionalUnit(FunctionalUnits.STORE);
 		if(reservationStationNumber!=-1){
 			RowScoreboard RS = new RowScoreboard();
@@ -138,15 +162,28 @@ public class Run {
 			}
 
 			current = new RowROB(Type.SW,0,0, false);
-			rob.push(current);
 			RS.busy = true;
 			RS.address = offset;	
-			scoreboard.set(reservationStationNumber, RS);
+			if(	rob.push(current))
+				scoreboard.set(reservationStationNumber, RS);
+			else
+				return false;
+			ArrayList<Stage> crrnt = julie.get(clock);
+			if(crrnt != null){
+				crrnt.set(I.number,Stage.ISSUE);
+			}
+			else{
+				crrnt = new ArrayList<Stage>();
+				crrnt.set(I.number,Stage.ISSUE);
+			}
+			return true;
 		}
+		else
+			return false;
 	}
 	//handles the issuing of any 3 operand instruction 
-	public void HandleThreeOprands(Instruction I){
-		int reservationStationNumber =EmptyFunctionalUnit(FunctionalUnits.STORE);
+	public boolean HandleThreeOprands(Instruction I,FunctionalUnits f){
+		int reservationStationNumber =EmptyFunctionalUnit(f);
 		if(reservationStationNumber!=-1){
 			RowScoreboard RS = new RowScoreboard();
 			int rs = I.regB;
@@ -184,12 +221,25 @@ public class Run {
 				RS.qj = 0;
 			}
 			RS.busy = true;
-			registerStatus.set(rd, ROBLOC);
 			current = new RowROB(I.type,rd,0, false);
-			rob.push(current);
-			scoreboard.set(reservationStationNumber, RS);
-
+			if(rob.push(current)){
+				registerStatus.set(rd, ROBLOC);
+				scoreboard.set(reservationStationNumber, RS);
+			}
+			else
+				return false;
+			ArrayList<Stage> crrnt = julie.get(clock);
+			if(crrnt != null){
+				crrnt.set(I.number,Stage.ISSUE);
+			}
+			else{
+				crrnt = new ArrayList<Stage>();
+				crrnt.set(I.number,Stage.ISSUE);
+			}
+			return true;
 		}
+		else
+			return false;
 
 	}
 	//returns position of the suitable RS 
