@@ -43,13 +43,11 @@ public class ICache {
 		}
 	}
 
-	public ICache(int cycles, int cacheSize, int lineSize, int associativity,
-			Type type, WritePolicy writePolicy) {
+	public ICache(int cycles, int cacheSize, int lineSize, int associativity, WritePolicy writePolicy) {
 		this.cycles = cycles;
 		this.cacheSize = cacheSize;
 		this.lineSize = lineSize;
 		this.associativity = associativity;
-		this.type = type;
 		this.writePolicy = writePolicy;
 		sets = new ArrayList<ArrayList<Row>>(cacheSize
 				/ (lineSize * associativity));
@@ -59,7 +57,7 @@ public class ICache {
 		tagSize = 16 - offsetSize - indexSize;
 	}
 
-	public Pair<Instruction, Integer> read(int address) {
+	public Instruction read(int address) {
 		time += cycles;
 		int offset = address & ((int) Math.pow(2, offsetSize) - 1);
 		int index = (address >> offsetSize)
@@ -70,17 +68,35 @@ public class ICache {
 		for (int i = 0; i < set.size(); ++i) {
 			Row row = set.get(i);
 			if (row.tag == tag) {
-				return new Pair<>(Helper.stringToInstruction(row.data
-						.substring(2 * offset, 2 * (offset + 1))), time);
+				return Helper.stringToInstruction(row.data
+						.substring(2 * offset, 2 * (offset + 1)));
 			}
 		}
 		if (next != null) {
 			return next.read(address);
 		}
 		// return new Pair<>(memory.loadData(address), time + memory.cycles);
-		return new Pair<>(memory.loadInstruction(address), time + memory.cycles);
+		return memory.loadInstruction(address);
 	}
-
+	public int readCycles(int address) {
+		time += cycles;
+		int offset = address & ((int) Math.pow(2, offsetSize) - 1);
+		int index = (address >> offsetSize)
+				& ((int) Math.pow(2, indexSize) - 1);
+		int tag = (address >> (offsetSize + indexSize))
+				& ((int) Math.pow(2, tagSize) - 1);
+		ArrayList<Row> set = sets.get(index);
+		for (int i = 0; i < set.size(); ++i) {
+			Row row = set.get(i);
+			if (row.tag == tag) {
+				return time;
+			}
+		}
+		if (next != null) {
+			return next.readCycles(address);
+		}
+		return time + memory.cycles;
+	}
 	public void write(int address, String data) {
 		time += cycles;
 		int index = (address >> offsetSize)
@@ -119,5 +135,36 @@ public class ICache {
 				memory.storeData(address, data);
 			}
 		}
+	}
+	public int writeCycles(int address, String data) {
+		time += cycles;
+		int index = (address >> offsetSize)
+				& ((int) Math.pow(2, indexSize) - 1);
+		int tag = (address >> (offsetSize + indexSize))
+				& ((int) Math.pow(2, tagSize) - 1);
+		ArrayList<Row> set = sets.get(index);
+		for (int i = 0; i < set.size(); ++i) {
+			Row row = set.get(i);
+			if (row.tag == -1) {
+				return time;
+			}
+		}
+		if (set.get(0).dirty) {
+			int oldAddress = set.get(0).tag << (indexSize + offsetSize);
+			if (next != null) {
+				next.writeCycles(oldAddress, set.get(0).data);
+			} else {
+				return time += memory.cycles;			
+			}
+		}
+		
+		if (writePolicy == WritePolicy.WRITE_THROUGH) {
+			if (next != null) {
+				next.writeCycles(address, data);
+			} else {
+				return time += memory.cycles;
+			}
+		}
+		return time;
 	}
 }

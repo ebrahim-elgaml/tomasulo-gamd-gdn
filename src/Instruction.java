@@ -12,9 +12,18 @@ public class Instruction {
 	}
 	
 
-	public void load() {
+	public String load() {
+		String baseAddress = Run.registersFile.get(regB);
+		int address = imm + Helper.hexToDecimal(baseAddress);
+		return MemoryHandler.read(address);
 		
 	}
+	public int store() {
+		String baseAddress = Run.registersFile.get(regB);
+		int address = imm + Helper.hexToDecimal(baseAddress);
+		return address;
+	}
+	
 	public int add(){
 		return 0;
 	}

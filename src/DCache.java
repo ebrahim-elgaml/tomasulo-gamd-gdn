@@ -58,7 +58,7 @@ public class DCache {
 		tagSize = 16 - offsetSize - indexSize;
 	}
 
-	public Pair<String, Integer> read(int address) {
+	public String read(int address) {
 		time += cycles;
 		int offset = address & ((int) Math.pow(2, offsetSize) - 1);
 		int index = (address >> offsetSize)
@@ -69,14 +69,32 @@ public class DCache {
 		for (int i = 0; i < set.size(); ++i) {
 			Row row = set.get(i);
 			if (row.tag == tag) {
-				return new Pair<>(row.data.substring(2 * offset,
-						2 * (offset + 1)), time);
+				return row.data.substring(2 * offset, 2 * (offset + 1));
 			}
 		}
 		if (next != null) {
 			return next.read(address);
 		}
-		return new Pair<>(memory.loadData(address), time + memory.cycles);
+		return memory.loadData(address);
+	}
+	public int readCycles(int address) {
+		time += cycles;
+		int offset = address & ((int) Math.pow(2, offsetSize) - 1);
+		int index = (address >> offsetSize)
+				& ((int) Math.pow(2, indexSize) - 1);
+		int tag = (address >> (offsetSize + indexSize))
+				& ((int) Math.pow(2, tagSize) - 1);
+		ArrayList<Row> set = sets.get(index);
+		for (int i = 0; i < set.size(); ++i) {
+			Row row = set.get(i);
+			if (row.tag == tag) {
+				return time;
+			}
+		}
+		if (next != null) {
+			return next.readCycles(address);
+		}
+		return time + memory.cycles;	
 	}
 
 	public void write(int address, String data) {
@@ -117,5 +135,35 @@ public class DCache {
 				memory.storeData(address, data);
 			}
 		}
+	}
+	public int writeCycles(int address, String data) {
+		time += cycles;
+		int index = (address >> offsetSize)
+				& ((int) Math.pow(2, indexSize) - 1);
+		int tag = (address >> (offsetSize + indexSize))
+				& ((int) Math.pow(2, tagSize) - 1);
+		ArrayList<Row> set = sets.get(index);
+		for (int i = 0; i < set.size(); ++i) {
+			Row row = set.get(i);
+			if (row.tag == -1) {
+				return time;
+			}
+		}
+		if (set.get(0).dirty) {
+			int oldAddress = set.get(0).tag << (indexSize + offsetSize);
+			if (next != null) {
+				next.writeCycles(oldAddress, set.get(0).data);
+			} else {
+				time += memory.cycles;
+			}
+		}
+		if (writePolicy == WritePolicy.WRITE_THROUGH) {
+			if (next != null) {
+				next.writeCycles(address, data);
+			} else {
+				time += memory.cycles;
+			}
+		}	
+		return time;
 	}
 }
