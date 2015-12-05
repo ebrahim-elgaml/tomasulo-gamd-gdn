@@ -2,7 +2,7 @@ import java.util.ArrayList;
 
 public class Run {
 	int PC;
-	ArrayList<String> registersFile = new ArrayList<String>();
+	static ArrayList<String> registersFile = new ArrayList<String>();
 	ArrayList<ArrayList<Stage>> julie = new ArrayList<ArrayList<Stage>>();
 	ArrayList<Integer> registerStatus = new ArrayList<Integer>();
 	ArrayList<ArrayList<RowScoreboard>> scoreboard = new ArrayList<ArrayList<RowScoreboard>>();
