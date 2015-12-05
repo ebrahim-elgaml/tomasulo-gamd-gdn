@@ -11,7 +11,28 @@ public class Instruction {
 		this.imm = imm;
 	}
 	
+
 	public void load() {
 		
+	}
+	public int add(){
+		return 0;
+	}
+	
+	public int sub(){
+		return 0;
+	}
+	
+	public int mult(){
+		return 0;
+	}
+	
+	public int nand(){
+		return 0;
+	}
+	
+	public int mul(){
+		return 0;
+
 	}
 }
