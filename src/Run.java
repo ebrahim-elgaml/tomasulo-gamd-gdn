@@ -266,8 +266,8 @@ public class Run {
 		    }
 		    String binary=buf1.reverse().toString();// reverse to get binary 1010
 		    int length=binary.length();
-		    if(length<8){
-		       while (8-length>0){
+		    if(length<7){
+		       while (7-length>0){
 		           buf2.append("0");// add zero until length =8
 		           length++;
 		       }
@@ -279,6 +279,9 @@ public class Run {
 	public static boolean isNegative(int Hex) {
 		return (Hex/10>=8);
 
+	}
+	public static void main(String[]args){
+		System.out.println(Binaryform(12));
 	}
 	
 }
