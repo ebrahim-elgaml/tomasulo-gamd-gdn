@@ -71,7 +71,7 @@ public class ICache {
 			Row row = set.get(i);
 			if (row.tag == tag) {
 				return new Pair<>(Helper.stringToInstruction(row.data
-						.substring(2 * offset, 2 * (offset + 1))), time);
+						.substring(2 * offset, 2 * (offset + 1)),i), time);
 			}
 		}
 		if (next != null) {

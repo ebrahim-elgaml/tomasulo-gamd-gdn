@@ -3,6 +3,25 @@ public class ROB {
 	RowROB [] array;
 	int head; 
 	int tail;
+	
+	public RowROB[] getArray() {
+		return array;
+	}
+	public void setArray(RowROB[] array) {
+		this.array = array;
+	}
+	public int getHead() {
+		return head;
+	}
+	public void setHead(int head) {
+		this.head = head;
+	}
+	public int getTail() {
+		return tail;
+	}
+	public void setTail(int tail) {
+		this.tail = tail;
+	}
 	public ROB(int size) {
 		array = new RowROB[size];
 		head = -1;
