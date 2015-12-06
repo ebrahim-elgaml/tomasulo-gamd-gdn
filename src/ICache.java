@@ -68,8 +68,9 @@ public class ICache {
 		for (int i = 0; i < set.size(); ++i) {
 			Row row = set.get(i);
 			if (row.tag == tag) {
-				return Helper.stringToInstruction(row.data
-						.substring(2 * offset, 2 * (offset + 1)));
+
+				return Helper.stringToInstruction(row.data.substring(2 * offset, 2 * (offset + 1)),i);
+
 			}
 		}
 		if (next != null) {
