@@ -5,9 +5,9 @@ import java.util.Hashtable;
 public class Run {
 	static int origin = -1;
 	static int PC;
-	int clock;
+	static int clock;
 	static ArrayList<String> registersFile = new ArrayList<String>();
-	ArrayList<ArrayList<Stage>> julie = new ArrayList<ArrayList<Stage>>();
+	static ArrayList<ArrayList<Stage>> julie = new ArrayList<ArrayList<Stage>>();
 	ArrayList<Integer> registerStatus = new ArrayList<Integer>();
 	static ArrayList<RowScoreboard>  scoreboard = new ArrayList<RowScoreboard>(); 
 	static Hashtable<Type, Integer> instructionCycles = new Hashtable<Type, Integer>();
