@@ -47,4 +47,8 @@ public class ROB {
 			head = 0;
 		return temp;
 	}
+	
+	public void replaceValue(int row, int value){
+		array[row].value = value;
+	}
 }
