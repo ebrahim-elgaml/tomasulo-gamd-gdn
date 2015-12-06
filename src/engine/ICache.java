@@ -1,3 +1,4 @@
+package engine;
 import java.util.ArrayList;
 
 public class ICache {
@@ -11,7 +12,7 @@ public class ICache {
 	ICache next;
 	static Memory memory;
 
-	enum WritePolicy {
+	public enum WritePolicy {
 		WRITE_THROUGH, WRITE_BACK
 	};
 

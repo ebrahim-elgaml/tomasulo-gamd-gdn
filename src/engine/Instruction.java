@@ -1,3 +1,4 @@
+package engine;
 public class Instruction {
 	Type type;
 	int regA;
