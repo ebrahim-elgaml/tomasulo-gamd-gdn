@@ -9,7 +9,7 @@ public class Memory {
 		cycles = c;
 		this.base = base;
 		for(int i = 0; i< inst.size(); i++){
-			instructions.add(Helper.stringToInstruction(inst.get(i),i));
+			instructions.add(Helper.stringToInstruction(inst.get(i), i));
 		}
 		for(int i = 0; i< d.size(); i++){
 			data.add(d.get(i));
