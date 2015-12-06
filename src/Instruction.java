@@ -15,7 +15,6 @@ public class Instruction {
 		this.imm = imm;
 		this.noOfCycles = Run.instructionCycles.get(t);
 	}
-	LW, SW, JMP, BEQ, JALR, RET, ADD, SUB, ADDI, NAND, MUL;
 	public void execute(){
 		if(this.type == Type.LW){
 			this.load();
