@@ -2,7 +2,8 @@
 import java.util.ArrayList;
 
 public class Run {
-	int PC , clock;
+	int org;
+	int PC , clock,widthSuperscaler;
 	static ArrayList<String> registersFile = new ArrayList<String>();
 	ArrayList<ArrayList<Stage>> julie = new ArrayList<ArrayList<Stage>>();
 	ArrayList<Integer> registerStatus = new ArrayList<Integer>();
@@ -13,8 +14,10 @@ public class Run {
 	public Run(ArrayList<String> ins, int numberOfEntryROB, int memoryCycles, int org, ArrayList<String> data,
 			int cacheNumber, ArrayList<Integer> cycles, ArrayList<Integer> cacheSize, ArrayList<Integer> lineSize,
 			ArrayList<Integer> associativity, ArrayList<DCache.WritePolicy> dWritePolicy,
-			ArrayList<ICache.WritePolicy> iWritePolicy) {
+			ArrayList<ICache.WritePolicy> iWritePolicy, int widthSuperscaler) {
+		this.org = org;
 		PC = org;
+		this.widthSuperscaler = widthSuperscaler;
 		for (int i = 0; i < 8; i++)
 			registersFile.add("00");
 		for (int i = 0; i < 8; i++)
@@ -27,11 +30,103 @@ public class Run {
 	//Initializing the functional units for each reservation station
 	public void InitializeScoreboard(ArrayList<FunctionalUnits>FunctionalUnits){
 		for(int i = 0;i<FunctionalUnits.size();i++){
-			scoreboard.set(i , new RowScoreboard(FunctionalUnits.get(i),false, null, -1, -1, -1, -1,-1));
+			scoreboard.set(i , new RowScoreboard(FunctionalUnits.get(i),false, null, -1, -1, -1, -1,-1,-1));
 		}
 		for (int i = 0;i<registerStatus.size();i++){
 			registerStatus.set(i, -1);
 		}
+	}
+	public void AlwaysRun (int numberOfInstructions) {
+		for (int i = 0; i < numberOfInstructions; i++) {
+			for (int j = 0; j < widthSuperscaler; j++) {
+				Instruction instruction = MemoryHandler.instructionCache.read(PC); 
+				boolean fetched = Issue(instruction);
+				if (!fetched) break;
+			}
+			// get instructions that needs to be executed  
+			ArrayList<Instruction> instructionsToExecute = needExecute();
+			for (int j = 0; j< instructionsToExecute.size(); j++) {
+				// call method execute 
+				instructionsToExecute.get(j).execute();
+			}
+			// write all instructions that needs to write
+			needWrite(); 
+			// commit instruction that can commit 
+			commit();
+		}
+	}
+	// commit all instructions that need to commit 
+	public void commit() {
+		if (rob.isEmpty() || !rob.array[rob.head].ready) return;
+		if (rob.array[rob.head].insType == Type.SW) {
+			MemoryHandler.dataCache.write(rob.array[rob.head].dest, Helper.decimalToHex(rob.array[rob.head].value));
+			rob.pop();
+			return;
+		}
+		if (rob.array[rob.head].insType == Type.BEQ && rob.array[rob.head].value == -300) {
+			PC = rob.array[rob.head].dest;
+			while(rob.pop() != null);
+			return;
+		}
+		registersFile.add(rob.array[rob.head].dest, Helper.decimalToHex(rob.array[rob.head].value));
+		if (registerStatus.get(rob.array[rob.head].dest) == rob.head) 
+			registerStatus.add(rob.head, -1);
+		rob.pop();
+	}
+	//check what instruction needs to write and write 
+	public void needWrite() {
+		ArrayList<Integer> result = new ArrayList<Integer>(); 
+		ArrayList<Stage> lastClk = julie.get(julie.size() - 1);
+		Type typeIns1;
+		boolean write1 = false; 
+		for (int i = 0; i < lastClk.size(); i++) {
+			Instruction temp = MemoryHandler.instructionCache.read(org + i);
+			if (result.isEmpty() && lastClk.get(i) == Stage.EXEC) {
+				if (temp.numberOfCycles == 0) { 
+					result.add(i);
+					typeIns1 = temp.type; 
+					if (typeIns1 == Type.SW) {
+						if (julie.get(julie.size() - 2).get(i) == Stage.WRITE) write1 = true; 
+					}
+				}
+			}
+			else if (result.size() == 1 && typeIns1 == Type.SW && !write1 && temp.numberOfCycles == 0 && lastClk.get(i) == Stage.EXEC) 
+				result.add(i);
+		}
+
+		for(int i =0; i < result.size(); i++) {
+			for (int j = 0; i < scoreboard.size(); j++) {
+				if (scoreboard.get(j).instructionAddress == i+org){
+					scoreboard.get(j).busy = false;
+					rob.array[scoreboard.get(j).destination].ready = true;
+					rob.array[scoreboard.get(j).destination].value = Helper.hexToDecimal(scoreboard.get(j).result);
+					julie.get(julie.size() - 1).add(i,Stage.WRITE);
+					Instruction temp = MemoryHandler.instructionCache.read(org + i);
+					if(temp.type == Type.SW || temp.type == Type.BEQ) 
+						rob.array[scoreboard.get(j).destination].dest = scoreboard.get(j).address;
+					for(int k = 0; k < scoreboard.size(); k++) {
+						if (scoreboard.get(k).qj == scoreboard.get(k).address && scoreboard.get(k).busy){
+							scoreboard.get(k).qj = 0;
+							scoreboard.get(k).vj = Helper.hexToDecimal(scoreboard.get(k).result);
+						}
+						if (scoreboard.get(k).qk == scoreboard.get(k).address && scoreboard.get(k).busy){
+							scoreboard.get(k).qk = 0;
+							scoreboard.get(k).vk = Helper.hexToDecimal(scoreboard.get(k).result);
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	// check what instructions needs to be executed
+	public ArrayList<Instruction> needExecute() {
+		ArrayList<Instruction> result = new ArrayList<Instruction>(); 
+		for (int i = 0; i < scoreboard.size(); i++) {
+			if (scoreboard.get(i).qj == 0 && scoreboard.get(i).qk == 0)
+				result.add(MemoryHandler.instructionCache.read(scoreboard.get(i).instructionAddress));
+		}
+		return result;
 	}
 	//	LW, SW, JMP, BEQ, JALR, RET, ADD, SUB, ADDI, NAND, MUL;
 	public boolean Issue(Instruction I){
@@ -50,6 +145,7 @@ public class Run {
 		return false;
 
 	}
+	
 	// Branch prediction mechanism
 	public void setPC(Instruction I){
 		if(Binaryform(I.imm).charAt(0)=='1')
@@ -107,6 +203,7 @@ public class Run {
 			RS.address = offset;
 			if(Issue){
 				registerStatus.set(rd,ROBLOC);
+				RS.instructionAddress = PC;
 				scoreboard.set(reservationStationNumber, RS);
 			}
 			else
@@ -166,9 +263,10 @@ public class Run {
 			current = new RowROB(Type.SW,0,0, false);
 			RS.busy = true;
 			RS.address = offset;	
-			if(	rob.push(current))
+			if(	rob.push(current)){
+				RS.instructionAddress = PC;
 				scoreboard.set(reservationStationNumber, RS);
-			else
+			}else
 				return false;
 			ArrayList<Stage> crrnt = julie.get(clock);
 			if(crrnt != null){
@@ -225,6 +323,7 @@ public class Run {
 			RS.busy = true;
 			current = new RowROB(I.type,rd,0, false);
 			if(rob.push(current)){
+				RS.instructionAddress = PC;
 				registerStatus.set(rd, ROBLOC);
 				scoreboard.set(reservationStationNumber, RS);
 			}
