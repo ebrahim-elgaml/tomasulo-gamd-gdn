@@ -3,25 +3,25 @@ import java.util.ArrayList;
 
 public class Run {
 	int PC , clock;
-	ArrayList<String> registersFile = new ArrayList<String>();
+	static ArrayList<String> registersFile = new ArrayList<String>();
 	ArrayList<ArrayList<Stage>> julie = new ArrayList<ArrayList<Stage>>();
 	ArrayList<Integer> registerStatus = new ArrayList<Integer>();
 	ArrayList<RowScoreboard>  scoreboard = new ArrayList<RowScoreboard>(); 
 	ArrayList<FunctionalUnits> FunctionalUnit = new ArrayList<FunctionalUnits>();///had5ol mn el user 3ayzha
 	ROB rob = new ROB(100-1);//////Size will be give by the user 	
 
-	public Run(ArrayList<String> ins, int numberOfEntryROB, int memoryCycles,
-			int org, ArrayList<String> data, int cacheNumber,
-			ArrayList<Integer> cycles, ArrayList<Integer> cacheSize,
-			ArrayList<Integer> lineSize, ArrayList<Integer> associativity,
-			ArrayList<DCache.WritePolicy> writePolicy) {
+	public Run(ArrayList<String> ins, int numberOfEntryROB, int memoryCycles, int org, ArrayList<String> data,
+			int cacheNumber, ArrayList<Integer> cycles, ArrayList<Integer> cacheSize, ArrayList<Integer> lineSize,
+			ArrayList<Integer> associativity, ArrayList<DCache.WritePolicy> dWritePolicy,
+			ArrayList<ICache.WritePolicy> iWritePolicy) {
 		PC = org;
 		for (int i = 0; i < 8; i++)
 			registersFile.add("00");
 		for (int i = 0; i < 8; i++)
 			registerStatus.add(-1);
 		rob = new ROB(numberOfEntryROB);
-		MemoryHandler.initMemoryHandler(memoryCycles, org, ins, data,  cacheNumber, cycles,  cacheSize,  lineSize,  associativity,  writePolicy); 
+
+		MemoryHandler.initMemoryHandler(memoryCycles, org, ins, data,  cacheNumber, cycles,  cacheSize,  lineSize,  associativity,  dWritePolicy,iWritePolicy); 
 		InitializeScoreboard(FunctionalUnit);
 	}
 	//Initializing the functional units for each reservation station
@@ -48,6 +48,7 @@ public class Run {
 		case MUL : if(HandleThreeOprands(I,FunctionalUnits.MULTIPLY)){PC++;return true;}else return false;
 		}
 		return false;
+
 	}
 	// Branch prediction mechanism
 	public void setPC(Instruction I){
@@ -119,6 +120,7 @@ public class Run {
 				crrnt.set(I.number,Stage.ISSUE);
 			}
 			return true;
+
 		}
 		return false;
 	}
