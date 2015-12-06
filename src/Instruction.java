@@ -52,6 +52,8 @@ public class Instruction {
 	public void load() {
 		String baseAddress = Run.registersFile.get(regB);
 		int address = imm + Helper.hexToDecimal(baseAddress);
+		int julieColumn = this.addressOfInstruction-Run.origin;
+		Run.julie.get(Run.clock).add(julieColumn, Stage.EXEC);
 		if(noOfCycles == -1) {
 			noOfCycles = MemoryHandler.dataCache.readCycles(address);
 		}
@@ -71,6 +73,8 @@ public class Instruction {
 	public void store() {
 		String baseAddress = Run.registersFile.get(regB);
 		int address = imm + Helper.hexToDecimal(baseAddress);
+		int julieColumn = this.addressOfInstruction-Run.origin;
+		Run.julie.get(Run.clock).add(julieColumn, Stage.EXEC);
 		for(int i = 0; i<Run.scoreboard.size(); i++) {
 			if(Run.scoreboard.get(i).instructionAddress == this.addressOfInstruction) {
 				Run.scoreboard.get(i).result =  Run.registersFile.get(regA);
@@ -81,6 +85,8 @@ public class Instruction {
 		return;
 	}
 	public void branch() {
+		int julieColumn = this.addressOfInstruction-Run.origin;
+		Run.julie.get(Run.clock).add(julieColumn, Stage.EXEC);
 		if(noOfCycles>0) {
 			noOfCycles--;
 			return;
@@ -107,6 +113,8 @@ public class Instruction {
 	}
 	
 	public void add(){
+		int julieColumn = this.addressOfInstruction-Run.origin;
+		Run.julie.get(Run.clock).add(julieColumn, Stage.EXEC);
 		if(noOfCycles>0) {
 			noOfCycles--;
 			return;
@@ -122,6 +130,8 @@ public class Instruction {
 	}
 	
 	public void sub(){
+		int julieColumn = this.addressOfInstruction-Run.origin;
+		Run.julie.get(Run.clock).add(julieColumn, Stage.EXEC);
 		if(noOfCycles>0) {
 			noOfCycles--;
 			return;
@@ -137,6 +147,8 @@ public class Instruction {
 	}
 	
 	public void mul(){
+		int julieColumn = this.addressOfInstruction-Run.origin;
+		Run.julie.get(Run.clock).add(julieColumn, Stage.EXEC);
 		if(noOfCycles>0) {
 			noOfCycles--;
 			return;
@@ -152,6 +164,8 @@ public class Instruction {
 	}
 	
 	public void nand(){
+		int julieColumn = this.addressOfInstruction-Run.origin;
+		Run.julie.get(Run.clock).add(julieColumn, Stage.EXEC);
 		if(noOfCycles>0) {
 			noOfCycles--;
 			return;
@@ -166,6 +180,8 @@ public class Instruction {
 		}
 	}
 	public void addi(){
+		int julieColumn = this.addressOfInstruction-Run.origin;
+		Run.julie.get(Run.clock).add(julieColumn, Stage.EXEC);
 		if(noOfCycles>0) {
 			noOfCycles--;
 			return;
