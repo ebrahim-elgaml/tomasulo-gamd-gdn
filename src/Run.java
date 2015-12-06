@@ -1,12 +1,16 @@
 
 import java.util.ArrayList;
+import java.util.Hashtable;
 
 public class Run {
-	int PC , clock;
+	static int origin = -1;
+	static int PC;
+	int clock;
 	static ArrayList<String> registersFile = new ArrayList<String>();
 	ArrayList<ArrayList<Stage>> julie = new ArrayList<ArrayList<Stage>>();
 	ArrayList<Integer> registerStatus = new ArrayList<Integer>();
-	ArrayList<RowScoreboard>  scoreboard = new ArrayList<RowScoreboard>(); 
+	static ArrayList<RowScoreboard>  scoreboard = new ArrayList<RowScoreboard>(); 
+	static Hashtable<Type, Integer> instructionCycles = new Hashtable<Type, Integer>();
 	ArrayList<FunctionalUnits> FunctionalUnit = new ArrayList<FunctionalUnits>();///had5ol mn el user 3ayzha
 	ROB rob = new ROB(100-1);//////Size will be give by the user 	
 
@@ -113,11 +117,11 @@ public class Run {
 				return false;
 			ArrayList<Stage> crrnt = julie.get(clock);
 			if(crrnt != null){
-				crrnt.set(I.number,Stage.ISSUE);
+				crrnt.set(I.addressOfInstruction,Stage.ISSUE);
 			}
 			else{
 				crrnt = new ArrayList<Stage>();
-				crrnt.set(I.number,Stage.ISSUE);
+				crrnt.set(I.addressOfInstruction,Stage.ISSUE);
 			}
 			return true;
 
@@ -172,11 +176,11 @@ public class Run {
 				return false;
 			ArrayList<Stage> crrnt = julie.get(clock);
 			if(crrnt != null){
-				crrnt.set(I.number,Stage.ISSUE);
+				crrnt.set(I.addressOfInstruction,Stage.ISSUE);
 			}
 			else{
 				crrnt = new ArrayList<Stage>();
-				crrnt.set(I.number,Stage.ISSUE);
+				crrnt.set(I.addressOfInstruction,Stage.ISSUE);
 			}
 			return true;
 		}
@@ -232,11 +236,11 @@ public class Run {
 				return false;
 			ArrayList<Stage> crrnt = julie.get(clock);
 			if(crrnt != null){
-				crrnt.set(I.number,Stage.ISSUE);
+				crrnt.set(I.addressOfInstruction,Stage.ISSUE);
 			}
 			else{
 				crrnt = new ArrayList<Stage>();
-				crrnt.set(I.number,Stage.ISSUE);
+				crrnt.set(I.addressOfInstruction,Stage.ISSUE);
 			}
 			return true;
 		}
