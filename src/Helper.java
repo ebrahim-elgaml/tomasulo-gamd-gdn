@@ -68,7 +68,7 @@ public class Helper {
 		return sRev;
 	}
 	
-	public static Instruction stringToInstruction(String s,int number){
+	public static Instruction stringToInstruction(String s,int addressOfInstruction){
 
 		String[] inst = s.split(" ");
 		Type t = toType(inst[0]);
@@ -81,7 +81,7 @@ public class Helper {
 		}else if (inst.length == 3){
 			regB = Integer.parseInt(inst[2].substring(2));
 		}
-		return new Instruction(t,number, regA, regB, imm);
+		return new Instruction(t,addressOfInstruction, regA, regB, imm);
 	}
 	
 }

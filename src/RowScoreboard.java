@@ -9,7 +9,8 @@ public class RowScoreboard {
 	int vk; 
 	int qj; 
 	int qk; 
-	int address; 
+	int address;
+	String result;
 	int instructionAddress;
 	public RowScoreboard(){}
 	public RowScoreboard(FunctionalUnits unit,boolean busy, Type op,int vj,int vk, int qj, int qk, int address,int insAdd) {

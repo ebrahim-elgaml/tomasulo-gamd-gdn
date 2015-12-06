@@ -1,13 +1,17 @@
 
 import java.util.ArrayList;
+import java.util.Hashtable;
 
 public class Run {
-	int org;
-	int PC , clock,widthSuperscaler;
+	int widthSuperscaler;
+	static int origin = -1;
+	static int PC;
+	static int clock;
 	static ArrayList<String> registersFile = new ArrayList<String>();
-	ArrayList<ArrayList<Stage>> julie = new ArrayList<ArrayList<Stage>>();
+	static ArrayList<ArrayList<Stage>> julie = new ArrayList<ArrayList<Stage>>();
 	ArrayList<Integer> registerStatus = new ArrayList<Integer>();
-	ArrayList<RowScoreboard>  scoreboard = new ArrayList<RowScoreboard>(); 
+	static ArrayList<RowScoreboard>  scoreboard = new ArrayList<RowScoreboard>(); 
+	static Hashtable<Type, Integer> instructionCycles = new Hashtable<Type, Integer>();
 	ArrayList<FunctionalUnits> FunctionalUnit = new ArrayList<FunctionalUnits>();///had5ol mn el user 3ayzha
 	ROB rob = new ROB(100-1);//////Size will be give by the user 	
 
@@ -15,7 +19,7 @@ public class Run {
 			int cacheNumber, ArrayList<Integer> cycles, ArrayList<Integer> cacheSize, ArrayList<Integer> lineSize,
 			ArrayList<Integer> associativity, ArrayList<DCache.WritePolicy> dWritePolicy,
 			ArrayList<ICache.WritePolicy> iWritePolicy, int widthSuperscaler) {
-		this.org = org;
+		this.origin = org;
 		PC = org;
 		this.widthSuperscaler = widthSuperscaler;
 		for (int i = 0; i < 8; i++)
@@ -77,12 +81,12 @@ public class Run {
 	public void needWrite() {
 		ArrayList<Integer> result = new ArrayList<Integer>(); 
 		ArrayList<Stage> lastClk = julie.get(julie.size() - 1);
-		Type typeIns1;
+		Type typeIns1 = null;
 		boolean write1 = false; 
 		for (int i = 0; i < lastClk.size(); i++) {
-			Instruction temp = MemoryHandler.instructionCache.read(org + i);
+			Instruction temp = MemoryHandler.instructionCache.read(origin + i);
 			if (result.isEmpty() && lastClk.get(i) == Stage.EXEC) {
-				if (temp.numberOfCycles == 0) { 
+				if (temp.noOfCycles == 0) { 
 					result.add(i);
 					typeIns1 = temp.type; 
 					if (typeIns1 == Type.SW) {
@@ -90,18 +94,18 @@ public class Run {
 					}
 				}
 			}
-			else if (result.size() == 1 && typeIns1 == Type.SW && !write1 && temp.numberOfCycles == 0 && lastClk.get(i) == Stage.EXEC) 
+			else if (result.size() == 1 && typeIns1 == Type.SW && !write1 && temp.noOfCycles == 0 && lastClk.get(i) == Stage.EXEC) 
 				result.add(i);
 		}
 
 		for(int i =0; i < result.size(); i++) {
 			for (int j = 0; i < scoreboard.size(); j++) {
-				if (scoreboard.get(j).instructionAddress == i+org){
+				if (scoreboard.get(j).instructionAddress == i+origin){
 					scoreboard.get(j).busy = false;
 					rob.array[scoreboard.get(j).destination].ready = true;
 					rob.array[scoreboard.get(j).destination].value = Helper.hexToDecimal(scoreboard.get(j).result);
 					julie.get(julie.size() - 1).add(i,Stage.WRITE);
-					Instruction temp = MemoryHandler.instructionCache.read(org + i);
+					Instruction temp = MemoryHandler.instructionCache.read(origin + i);
 					if(temp.type == Type.SW || temp.type == Type.BEQ) 
 						rob.array[scoreboard.get(j).destination].dest = scoreboard.get(j).address;
 					for(int k = 0; k < scoreboard.size(); k++) {
@@ -210,11 +214,11 @@ public class Run {
 				return false;
 			ArrayList<Stage> crrnt = julie.get(clock);
 			if(crrnt != null){
-				crrnt.set(I.number,Stage.ISSUE);
+				crrnt.set(I.addressOfInstruction,Stage.ISSUE);
 			}
 			else{
 				crrnt = new ArrayList<Stage>();
-				crrnt.set(I.number,Stage.ISSUE);
+				crrnt.set(I.addressOfInstruction,Stage.ISSUE);
 			}
 			return true;
 
@@ -270,11 +274,11 @@ public class Run {
 				return false;
 			ArrayList<Stage> crrnt = julie.get(clock);
 			if(crrnt != null){
-				crrnt.set(I.number,Stage.ISSUE);
+				crrnt.set(I.addressOfInstruction,Stage.ISSUE);
 			}
 			else{
 				crrnt = new ArrayList<Stage>();
-				crrnt.set(I.number,Stage.ISSUE);
+				crrnt.set(I.addressOfInstruction,Stage.ISSUE);
 			}
 			return true;
 		}
@@ -331,11 +335,11 @@ public class Run {
 				return false;
 			ArrayList<Stage> crrnt = julie.get(clock);
 			if(crrnt != null){
-				crrnt.set(I.number,Stage.ISSUE);
+				crrnt.set(I.addressOfInstruction,Stage.ISSUE);
 			}
 			else{
 				crrnt = new ArrayList<Stage>();
-				crrnt.set(I.number,Stage.ISSUE);
+				crrnt.set(I.addressOfInstruction,Stage.ISSUE);
 			}
 			return true;
 		}
