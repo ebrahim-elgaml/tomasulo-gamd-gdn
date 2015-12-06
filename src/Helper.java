@@ -29,6 +29,8 @@ public class Helper {
 		return null;
 	}
 	public static int hexToDecimal(String hex) {
+		if (hex.equals("false"))
+			return -300;
 		int result = 0;
 		for(int i = 0; i< hex.length(); i++) {
 			String character = hex.charAt(i)+"";

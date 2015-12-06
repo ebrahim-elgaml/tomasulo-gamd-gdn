@@ -47,4 +47,10 @@ public class ROB {
 			head = 0;
 		return temp;
 	}
+	public boolean isEmpty(){
+		if (head == -1 || head == tail) 
+			return true;
+		return false;
+	}
+	
 }

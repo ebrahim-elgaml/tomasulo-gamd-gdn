@@ -13,7 +13,7 @@ public class RowScoreboard {
 	String result;
 	int instructionAddress;
 	public RowScoreboard(){}
-	public RowScoreboard(FunctionalUnits unit,boolean busy, Type op,int vj,int vk, int qj, int qk, int address) {
+	public RowScoreboard(FunctionalUnits unit,boolean busy, Type op,int vj,int vk, int qj, int qk, int address,int insAdd) {
 		this.unit = unit;
 		this.busy = busy; 
 		this.operation = op; 
@@ -21,7 +21,8 @@ public class RowScoreboard {
 		this.vk = vk; 
 		this.qj = qj; 
 		this.qk = qk; 
-		this.address = address; 
+		this.address = address;
+		this.instructionAddress = insAdd;
 	}
 	
 	public RowScoreboard(boolean busy, String type, Type operation, int vj,
