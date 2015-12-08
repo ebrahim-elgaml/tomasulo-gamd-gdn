@@ -2,7 +2,7 @@ package engine;
 import java.util.ArrayList;
 
 public class MemoryHandler {
-	static Memory memory;
+	public static Memory memory;
 	static DCache dataCache;
 	static ICache instructionCache;
 

@@ -33,7 +33,24 @@ public class Main extends Application {
 		code.setPrefHeight(600);
 		code.autosize();
 		grid.add(code, 0, 0, 1, 1);
+		
+		Button memory = new Button("Memory");
+		grid.add(memory, 1,0,1,1);
+		memory.setOnAction(new EventHandler<ActionEvent>() {
 
+			@Override
+			public void handle(ActionEvent arg0) {
+				MemoryGUI window = new MemoryGUI();
+				Stage memStage = new Stage();
+				memStage.show();
+				try {
+					window.start(memStage);
+				} catch (Exception e) {
+					System.out.println("Exception");
+				}
+			}
+		});
+		
 		Button run = new Button("Run");
 		grid.add(run, 0, 1, 1, 1);
 		run.setOnAction(new EventHandler<ActionEvent>() {
