@@ -1,22 +1,23 @@
 package engine;
+
 import java.util.ArrayList;
 import java.util.Hashtable;
 
 public class Run {
 	int widthSuperscaler;
-	static int origin = -1;
-	static int PC;
-	static int clock;
-	static ArrayList<String> registersFile = new ArrayList<String>();
-	static ArrayList<ArrayList<Stage>> julie = new ArrayList<ArrayList<Stage>>();
-	ArrayList<Integer> registerStatus = new ArrayList<Integer>();
-	static ArrayList<RowScoreboard> scoreboard = new ArrayList<RowScoreboard>();
-	static Hashtable<Type, Integer> instructionCycles = new Hashtable<Type, Integer>();
-	ArrayList<FunctionalUnits> FunctionalUnit = new ArrayList<FunctionalUnits>();// /had5ol
-																					// mn
-																					// el
-																					// user
-																					// 3ayzha
+	public static int origin = -1;
+	public static int PC;
+	public static int clock;
+	public static ArrayList<String> registersFile = new ArrayList<String>();
+	public static ArrayList<ArrayList<Stage>> julie = new ArrayList<ArrayList<Stage>>();
+	public ArrayList<Integer> registerStatus = new ArrayList<Integer>();
+	public static ArrayList<RowScoreboard> scoreboard = new ArrayList<RowScoreboard>();
+	public static Hashtable<Type, Integer> instructionCycles = new Hashtable<Type, Integer>();
+	public ArrayList<FunctionalUnits> FunctionalUnit = new ArrayList<FunctionalUnits>();// /had5ol
+	// mn
+	// el
+	// user
+	// 3ayzha
 	ROB rob = new ROB(100 - 1);// ////Size will be give by the user
 
 	public Run(ArrayList<String> ins, int numberOfEntryROB, int memoryCycles,
@@ -25,7 +26,7 @@ public class Run {
 			ArrayList<Integer> lineSize, ArrayList<Integer> associativity,
 			ArrayList<DCache.WritePolicy> dWritePolicy,
 			ArrayList<ICache.WritePolicy> iWritePolicy, int widthSuperscaler) {
-		this.origin = org;
+		origin = org;
 		PC = org;
 		this.widthSuperscaler = widthSuperscaler;
 		for (int i = 0; i < 8; i++)
@@ -54,8 +55,8 @@ public class Run {
 	public void AlwaysRun(int numberOfInstructions) {
 		for (int i = 0; i < numberOfInstructions; i++) {
 			for (int j = 0; j < widthSuperscaler; j++) {
-				Instruction instruction = MemoryHandler.instructionCache
-						.read(PC);
+
+				Instruction instruction = MemoryHandler.readInstruction(PC);
 				boolean fetched = Issue(instruction);
 				if (!fetched)
 					break;
@@ -208,6 +209,7 @@ public class Run {
 				return true;
 			} else
 				return false;
+		default:
 		}
 		return false;
 
@@ -445,9 +447,4 @@ public class Run {
 		return (Hex / 10 >= 8);
 
 	}
-
-	public static void main(String[] args) {
-		System.out.println(Binaryform(12));
-	}
-
 }

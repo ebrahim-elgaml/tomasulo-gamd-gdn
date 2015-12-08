@@ -80,7 +80,7 @@ public class ICache {
 	}
 	public int readCycles(int address) {
 		time += cycles;
-		int offset = address & ((int) Math.pow(2, offsetSize) - 1);
+//		int offset = address & ((int) Math.pow(2, offsetSize) - 1);
 		int index = (address >> offsetSize)
 				& ((int) Math.pow(2, indexSize) - 1);
 		int tag = (address >> (offsetSize + indexSize))
@@ -140,8 +140,8 @@ public class ICache {
 		time += cycles;
 		int index = (address >> offsetSize)
 				& ((int) Math.pow(2, indexSize) - 1);
-		int tag = (address >> (offsetSize + indexSize))
-				& ((int) Math.pow(2, tagSize) - 1);
+//		int tag = (address >> (offsetSize + indexSize))
+//				& ((int) Math.pow(2, tagSize) - 1);
 		ArrayList<Row> set = sets.get(index);
 		for (int i = 0; i < set.size(); ++i) {
 			Row row = set.get(i);
