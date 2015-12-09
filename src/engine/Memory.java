@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 public class Memory {
 	public ArrayList<Instruction> instructions = new ArrayList<Instruction>();
-	ArrayList<String> data = new ArrayList<String>();
+	public ArrayList<String> data = new ArrayList<String>();
 	int cycles;
 	int base;
 

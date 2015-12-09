@@ -108,7 +108,6 @@ public class Helper {
 		if (inst.length >= 4) {
 			if (t == Type.ADDI) {
 				regB = Integer.parseInt(inst[2].substring(1));
-				System.out.println(regB);
 				imm = Integer.parseInt(inst[3]);
 			} else {
 				regB = Integer.parseInt(inst[2].substring(1));
