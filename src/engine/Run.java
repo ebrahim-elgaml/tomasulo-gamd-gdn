@@ -7,7 +7,7 @@ public class Run {
 	public static int widthSuperscaler;
 	public static int origin = -1;
 	public static int PC;
-	public static int clock;
+	public static int clock = 0;
 	public static ArrayList<String> registersFile = new ArrayList<String>();
 	public static ArrayList<ArrayList<Stage>> julie = new ArrayList<ArrayList<Stage>>();
 	public static ArrayList<Integer> registerStatus = new ArrayList<Integer>();
@@ -38,14 +38,26 @@ public class Run {
 		MemoryHandler.initMemoryHandler(memoryCycles, org, ins, data,
 				cacheNumber, cycles, cacheSize, lineSize, associativity,
 				dWritePolicy, iWritePolicy);
+		FunctionalUnit.add(FunctionalUnits.ADDI);
 		InitializeScoreboard(FunctionalUnit);
+	}
+
+	Type funcToType(FunctionalUnits f) {
+		switch (f) {
+		case ADDI:
+			return Type.ADDI;
+		default:
+		}
+		return null;
 	}
 
 	// Initializing the functional units for each reservation station
 	public void InitializeScoreboard(ArrayList<FunctionalUnits> FunctionalUnits) {
 		for (int i = 0; i < FunctionalUnits.size(); i++) {
-			scoreboard.set(i, new RowScoreboard(FunctionalUnits.get(i), false,
-					null, -1, -1, -1, -1, -1, -1));
+			scoreboard
+					.add(new RowScoreboard(FunctionalUnits.get(i), false,
+							funcToType(FunctionalUnits.get(i)), -1, -1, -1, -1,
+							-1, -1));
 		}
 		for (int i = 0; i < registerStatus.size(); i++) {
 			registerStatus.set(i, -1);
@@ -55,8 +67,10 @@ public class Run {
 	public void AlwaysRun(int numberOfInstructions) {
 		for (int i = 0; i < numberOfInstructions; i++) {
 			for (int j = 0; j < widthSuperscaler; j++) {
-
+				clock++;
+				julie.add(new ArrayList<Stage>(numberOfInstructions));
 				Instruction instruction = MemoryHandler.readInstruction(PC);
+				System.out.println(instruction);
 				boolean fetched = Issue(instruction);
 				if (!fetched)
 					break;
@@ -71,6 +85,7 @@ public class Run {
 			needWrite();
 			// commit instruction that can commit
 			commit();
+			System.out.println(registersFile);
 		}
 	}
 
@@ -101,23 +116,27 @@ public class Run {
 	// check what instruction needs to write and write
 	public void needWrite() {
 		ArrayList<Integer> result = new ArrayList<Integer>();
-		ArrayList<Stage> lastClk = julie.get(julie.size() - 1);
-		Type typeIns1 = null;
-		boolean write1 = false;
-		for (int i = 0; i < lastClk.size(); i++) {
-			Instruction temp = MemoryHandler.instructionCache.read(origin + i);
-			if (result.isEmpty() && lastClk.get(i) == Stage.EXEC) {
-				if (temp.noOfCycles == 0) {
-					result.add(i);
-					typeIns1 = temp.type;
-					if (typeIns1 == Type.SW) {
-						if (julie.get(julie.size() - 2).get(i) == Stage.WRITE)
-							write1 = true;
+		if (clock > 3) {
+			ArrayList<Stage> lastClk = julie.get(julie.size() - 1);
+
+			Type typeIns1 = null;
+			boolean write1 = false;
+			for (int i = 0; i < lastClk.size(); i++) {
+				Instruction temp = MemoryHandler.instructionCache.read(origin
+						+ i);
+				if (result.isEmpty() && lastClk.get(i) == Stage.EXEC) {
+					if (temp.noOfCycles == 0) {
+						result.add(i);
+						typeIns1 = temp.type;
+						if (typeIns1 == Type.SW) {
+							if (julie.get(julie.size() - 2).get(i) == Stage.WRITE)
+								write1 = true;
+						}
 					}
-				}
-			} else if (result.size() == 1 && typeIns1 == Type.SW && !write1
-					&& temp.noOfCycles == 0 && lastClk.get(i) == Stage.EXEC)
-				result.add(i);
+				} else if (result.size() == 1 && typeIns1 == Type.SW && !write1
+						&& temp.noOfCycles == 0 && lastClk.get(i) == Stage.EXEC)
+					result.add(i);
+			}
 		}
 
 		for (int i = 0; i < result.size(); i++) {
@@ -166,7 +185,18 @@ public class Run {
 	// LW, SW, JMP, BEQ, JALR, RET, ADD, SUB, ADDI, NAND, MUL;
 	public boolean Issue(Instruction I) {
 		// checking the type of the instruction
+		for (int i = 0; i < julie.size(); i++) {
+			for (int j = 0; j < julie.get(i).size(); j++)
+				System.out.print(julie.get(i).get(j));
+		}
 		switch (I.type) {
+		case ADDI:
+			if (HandleAdd_Immediate(I)) {
+				PC++;
+				return true;
+			} else {
+				return false;
+			}
 		case LW:
 			if (HandleLoad_Immediate(I)) {
 				PC++;
@@ -222,6 +252,51 @@ public class Run {
 		else
 			PC = 1 + I.imm;
 
+	}
+
+	public boolean HandleAdd_Immediate(Instruction I) {
+		int reservationStationNumber = EmptyFunctionalUnit(FunctionalUnits.ADDI);
+		if (reservationStationNumber != -1) {
+			RowScoreboard RS = new RowScoreboard();
+			int rs = I.regB;
+			int rd = I.regA;
+			int offset = I.imm;
+			boolean Issue = true;
+			RowROB current;
+			int ROBLOC = registerStatus.get(rs);
+			if (registerStatus.get(rs) != -1) {
+				if (rob.getArray()[ROBLOC] != null
+						&& rob.getArray()[ROBLOC].ready) {
+					RS.vj = rob.getArray()[ROBLOC].value;
+					RS.qj = 0;
+				} else {
+					RS.qj = ROBLOC;
+					current = new RowROB(I.type, rd, 0, false);
+					Issue = rob.push(current);
+				}
+			} else {
+				RS.vj = Integer.parseInt(registersFile.get(rs));
+				RS.qj = 0;
+			}
+			RS.busy = true;
+			RS.destination = rd;
+			RS.address = offset;
+			if (Issue) {
+				registerStatus.set(rd, ROBLOC);
+				RS.instructionAddress = PC;
+				scoreboard.set(reservationStationNumber, RS);
+			} else
+				return false;
+			ArrayList<Stage> crrnt = julie.get(clock);
+			if (crrnt != null) {
+				crrnt.set(I.addressOfInstruction, Stage.ISSUE);
+			} else {
+				crrnt = new ArrayList<Stage>();
+				crrnt.set(I.addressOfInstruction, Stage.ISSUE);
+			}
+			return true;
+		}
+		return false;
 	}
 
 	// Jump: branches to the address PC+1+regA+imm

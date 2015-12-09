@@ -1,4 +1,5 @@
 package gui;
+
 import java.util.ArrayList;
 
 import javafx.application.Application;
@@ -18,6 +19,11 @@ import engine.Run;
 import engine.Type;
 
 public class Main extends Application {
+
+	String[] lines;
+	ArrayList<String> aLines;
+	ArrayList<String> data;
+	Run run;
 
 	@Override
 	public void start(Stage stage) throws Exception {
@@ -95,18 +101,50 @@ public class Main extends Application {
 		code.setPrefWidth(800);
 		code.setPrefHeight(600);
 		code.autosize();
-		grid.add(code, 0, 0, 1, 1);
+		grid.add(code, 0, 0, 3, 1);
 		
+		Button compileButton = new Button("Compile");
+		grid.add(compileButton, 0, 1, 1, 1);
+		compileButton.setOnAction(new EventHandler<ActionEvent>() {
+
+			@Override
+			public void handle(ActionEvent arg0) {
+				lines = code.getText().toString().split("\n");
+				aLines = new ArrayList<String>();
+				for (int i = 0; i < lines.length; ++i) {
+					aLines.add(lines[i]);
+				}
+				data = new ArrayList<String>();
+				run = new Run(aLines, numberOfEntryROB, memoryCycles, org,
+						data, cacheNumber, cycles, cacheSize, lineSize,
+						associativity, dWritePolicy, iWritePolicy,
+						widthSuperscaler);
+				for (int i = 0; i < lines.length; ++i) {
+					aLines.add(lines[i]);
+				}
+			}
+		});
+
+		Button runButton = new Button("Run");
+		grid.add(runButton, 1, 1, 1, 1);
+		runButton.setOnAction(new EventHandler<ActionEvent>() {
+
+			@Override
+			public void handle(ActionEvent arg0) {
+				run.AlwaysRun(lines.length);
+			}
+		});
+
 		Button memory = new Button("Memory");
-		grid.add(memory, 1,0,1,1);
+		grid.add(memory, 2, 1, 1, 1);
 		memory.setOnAction(new EventHandler<ActionEvent>() {
 
 			@Override
-			public void handle(ActionEvent arg0){
+			public void handle(ActionEvent arg0) {
 				MemoryGUI window = new MemoryGUI();
 				Stage memStage = new Stage();
 				memStage.show();
-			
+
 				try {
 					window.start(memStage);
 				} catch (Exception e) {
@@ -115,36 +153,6 @@ public class Main extends Application {
 				}
 			}
 		});
-		
-		final String[] lines = code.getText().toString().split("\n");
-		ArrayList<String> aLines = new ArrayList<String>();
-		for (int i = 0; i < lines.length; ++i) {
-			aLines.add(lines[i]);
-		}
-		ArrayList<String> data = new ArrayList<String>();
-
-		final Run run = new Run(aLines, numberOfEntryROB, memoryCycles, org,
-				data, cacheNumber, cycles, cacheSize, lineSize,
-				associativity, dWritePolicy, iWritePolicy,
-				widthSuperscaler);
-
-		
-		Button run1 = new Button("Run");
-		grid.add(run1, 0, 1, 1, 1);
-		run1.setOnAction(new EventHandler<ActionEvent>() {
-
-			@Override
-			public void handle(ActionEvent arg0) {
-				final String[] lines = code.getText().toString().split("\n");
-				ArrayList<String> aLines = new ArrayList<String>();
-				for (int i = 0; i < lines.length; ++i) {
-					aLines.add(lines[i]);
-				}
-				ArrayList<String> data = new ArrayList<String>();
-				run.AlwaysRun(lines.length);
-			}
-		});
-		;
 
 		stage.show();
 	}

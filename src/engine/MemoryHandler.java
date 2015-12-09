@@ -15,7 +15,6 @@ public class MemoryHandler {
 			ArrayList<DCache.WritePolicy> dWritePolicy,
 			ArrayList<ICache.WritePolicy> iWritePolicy) {
 		memory = new Memory(memoryCycles, org, instructions, data);
-		System.out.println(memory);
 		DCache.memory = memory;
 		DCache currentCache = dataCache;
 		for (int i = 0; i < cacheNumber; ++i) {
@@ -43,7 +42,11 @@ public class MemoryHandler {
 
 	public static void writeData(int address, String data) {
 		DCache.time = 0;
-		dataCache.write(address, data);
+		if (dataCache != null) {
+			dataCache.write(address, data);
+		} else {
+			memory.storeData(address, data);
+		}
 	}
 
 	public static Instruction readInstruction(int address) {
@@ -57,6 +60,10 @@ public class MemoryHandler {
 
 	public static void writeInstruction(int address, String data) {
 		ICache.time = 0;
-		instructionCache.write(address, data);
+		if (instructionCache != null) {
+			instructionCache.write(address, data);
+		} else {
+			memory.storeData(address, data);
+		}
 	}
 }

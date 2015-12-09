@@ -19,29 +19,36 @@ public class Instruction {
 		this.noOfCycles = Run.instructionCycles.get(t);
 	}
 
-	public Type getType() { 
+	public Type getType() {
 		return type;
 	}
+
 	public int getRegA() {
 		return regA;
 	}
+
 	public int getRegB() {
 		return regB;
 	}
+
 	public int getImm() {
 		return imm;
 	}
+
 	public int getIndexOfInstruction() {
 		return indexOfInstruction;
 	}
+
 	public int getAddressOfInstruction() {
 		return addressOfInstruction;
 	}
+
 	public int getNoOfCycles() {
 		return noOfCycles;
 	}
-	public void execute(){
-		if(this.type == Type.LW){
+
+	public void execute() {
+		if (this.type == Type.LW) {
 			this.load();
 			return;
 		}
@@ -230,4 +237,7 @@ public class Instruction {
 		}
 	}
 
+	public String toString() {
+		return type.toString();
+	}
 }
