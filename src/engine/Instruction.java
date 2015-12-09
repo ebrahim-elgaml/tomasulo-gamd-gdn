@@ -19,7 +19,7 @@ public class Instruction {
 		this.noOfCycles = Run.instructionCycles.get(t);
 	}
 
-	public Type getType() {
+	public Type getType() { 
 		return type;
 	}
 	public int getRegA() {

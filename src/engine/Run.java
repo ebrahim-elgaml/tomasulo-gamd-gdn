@@ -4,16 +4,16 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 
 public class Run {
-	int widthSuperscaler;
+	public static int widthSuperscaler;
 	public static int origin = -1;
 	public static int PC;
 	public static int clock;
 	public static ArrayList<String> registersFile = new ArrayList<String>();
 	public static ArrayList<ArrayList<Stage>> julie = new ArrayList<ArrayList<Stage>>();
-	public ArrayList<Integer> registerStatus = new ArrayList<Integer>();
+	public static ArrayList<Integer> registerStatus = new ArrayList<Integer>();
 	public static ArrayList<RowScoreboard> scoreboard = new ArrayList<RowScoreboard>();
 	public static Hashtable<Type, Integer> instructionCycles = new Hashtable<Type, Integer>();
-	public ArrayList<FunctionalUnits> FunctionalUnit = new ArrayList<FunctionalUnits>();// /had5ol
+	public static ArrayList<FunctionalUnits> FunctionalUnit = new ArrayList<FunctionalUnits>();// /had5ol
 	// mn
 	// el
 	// user
@@ -28,7 +28,7 @@ public class Run {
 			ArrayList<ICache.WritePolicy> iWritePolicy, int widthSuperscaler) {
 		origin = org;
 		PC = org;
-		this.widthSuperscaler = widthSuperscaler;
+		Run.widthSuperscaler = widthSuperscaler;
 		for (int i = 0; i < 8; i++)
 			registersFile.add("00");
 		for (int i = 0; i < 8; i++)

@@ -1,5 +1,4 @@
 package gui;
-
 import java.util.ArrayList;
 
 import javafx.application.Application;
@@ -103,34 +102,45 @@ public class Main extends Application {
 		memory.setOnAction(new EventHandler<ActionEvent>() {
 
 			@Override
-			public void handle(ActionEvent arg0) {
+			public void handle(ActionEvent arg0){
 				MemoryGUI window = new MemoryGUI();
 				Stage memStage = new Stage();
 				memStage.show();
+			
 				try {
 					window.start(memStage);
 				} catch (Exception e) {
-					System.out.println("Exception");
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
 			}
 		});
 		
-		Button run = new Button("Run");
-		grid.add(run, 0, 1, 1, 1);
-		run.setOnAction(new EventHandler<ActionEvent>() {
+		final String[] lines = code.getText().toString().split("\n");
+		ArrayList<String> aLines = new ArrayList<String>();
+		for (int i = 0; i < lines.length; ++i) {
+			aLines.add(lines[i]);
+		}
+		ArrayList<String> data = new ArrayList<String>();
+
+		final Run run = new Run(aLines, numberOfEntryROB, memoryCycles, org,
+				data, cacheNumber, cycles, cacheSize, lineSize,
+				associativity, dWritePolicy, iWritePolicy,
+				widthSuperscaler);
+
+		
+		Button run1 = new Button("Run");
+		grid.add(run1, 0, 1, 1, 1);
+		run1.setOnAction(new EventHandler<ActionEvent>() {
 
 			@Override
 			public void handle(ActionEvent arg0) {
-				String[] lines = code.getText().toString().split("\n");
+				final String[] lines = code.getText().toString().split("\n");
 				ArrayList<String> aLines = new ArrayList<String>();
 				for (int i = 0; i < lines.length; ++i) {
 					aLines.add(lines[i]);
 				}
 				ArrayList<String> data = new ArrayList<String>();
-				Run run = new Run(aLines, numberOfEntryROB, memoryCycles, org,
-						data, cacheNumber, cycles, cacheSize, lineSize,
-						associativity, dWritePolicy, iWritePolicy,
-						widthSuperscaler);
 				run.AlwaysRun(lines.length);
 			}
 		});

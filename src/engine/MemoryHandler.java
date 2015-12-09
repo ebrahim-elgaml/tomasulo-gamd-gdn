@@ -15,6 +15,7 @@ public class MemoryHandler {
 			ArrayList<DCache.WritePolicy> dWritePolicy,
 			ArrayList<ICache.WritePolicy> iWritePolicy) {
 		memory = new Memory(memoryCycles, org, instructions, data);
+		System.out.println(memory);
 		DCache.memory = memory;
 		DCache currentCache = dataCache;
 		for (int i = 0; i < cacheNumber; ++i) {
@@ -22,6 +23,7 @@ public class MemoryHandler {
 					lineSize.get(i), associativity.get(i), dWritePolicy.get(i));
 			currentCache = currentCache.next;
 		}
+		ICache.memory = memory;
 		ICache currentCache1 = instructionCache;
 		for (int i = 1; i < cacheNumber; ++i) {
 			currentCache1 = new ICache(cycles.get(i), cacheSize.get(i),

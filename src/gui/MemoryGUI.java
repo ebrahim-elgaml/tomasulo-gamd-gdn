@@ -1,10 +1,5 @@
 package gui;
 
-import java.util.ArrayList;
-
-import engine.Memory;
-import engine.Run;
-import engine.Type;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -14,11 +9,11 @@ import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import engine.Instruction;
+import engine.MemoryHandler;
+import engine.Type;
 
 public class MemoryGUI extends Application{
 	public static void main(String[] args) {
@@ -43,12 +38,12 @@ public class MemoryGUI extends Application{
         TableColumn regB = new TableColumn("Reg B");
         TableColumn imm = new TableColumn("Imm");
         table.getColumns().addAll(address,index,regA,regB,imm);
-        ArrayList test = new ArrayList();
-        engine.MemoryHandler.memory = new engine.Memory(1, 1, test,test);
-        engine.MemoryHandler.memory.instructions = new ArrayList<Instruction>();
+        //ArrayList test = new ArrayList();
+        //engine.MemoryHandler.memory = new engine.Memory(1, 1, test,test);
+       // engine.MemoryHandler.memory.instructions = new ArrayList<Instruction>();
         Type t = Type.LW;
         System.out.println("wow");
-        engine.MemoryHandler.memory.instructions.add(new Instruction(t,12,12,12,12));
+        System.out.println(MemoryHandler.memory);//.instructions.add(new Instruction(t,12,12,12,12));
         System.out.println("wow2");
         ObservableList instructions = FXCollections.observableArrayList(engine.MemoryHandler.memory.instructions);
         System.out.println(instructions.get(0));
