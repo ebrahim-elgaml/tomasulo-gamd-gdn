@@ -104,6 +104,7 @@ public class Helper {
 		Type t = toType(inst[0]);
 		int regA = 0, regB, imm;
 		imm = regB = -100;
+		regA = Integer.parseInt(inst[1].substring(1));
 		if (inst.length >= 4) {
 			if (t == Type.ADDI) {
 				regB = Integer.parseInt(inst[2].substring(1));
