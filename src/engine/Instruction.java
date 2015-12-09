@@ -222,7 +222,7 @@ public class Instruction {
 
 	public void addi() {
 		int julieColumn = this.addressOfInstruction - Run.origin;
-		Run.julie.get(Run.clock).add(julieColumn, Stage.EXEC);
+		Run.julie.get(Run.clock).set(julieColumn, Stage.EXEC);
 		if (noOfCycles > 0) {
 			noOfCycles--;
 			return;
