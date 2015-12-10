@@ -71,7 +71,7 @@ public class Run {
 				}
 				julie.add(julieItem);
 				Instruction instruction = MemoryHandler.readInstruction(PC);
-//				System.out.println(instruction);
+				// System.out.println(instruction);
 				boolean fetched = Issue(instruction);
 				if (!fetched)
 					break;
@@ -186,10 +186,10 @@ public class Run {
 	// LW, SW, JMP, BEQ, JALR, RET, ADD, SUB, ADDI, NAND, MUL;
 	public boolean Issue(Instruction I) {
 		// checking the type of the instruction
-//		for (int i = 0; i < julie.size(); i++) {
-//			for (int j = 0; j < julie.get(i).size(); j++)
-//				System.out.print(julie.get(i).get(j));
-//		}
+		// for (int i = 0; i < julie.size(); i++) {
+		// for (int j = 0; j < julie.get(i).size(); j++)
+		// System.out.print(julie.get(i).get(j));
+		// }
 		switch (I.type) {
 		case ADDI:
 			if (HandleAdd_Immediate(I)) {
