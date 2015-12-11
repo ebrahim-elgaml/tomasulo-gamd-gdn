@@ -222,6 +222,7 @@ public class Instruction {
 
 	public void addi() {
 		int julieColumn = this.addressOfInstruction - Run.origin;
+		System.out.println(Run.clock);
 		Run.julie.get(Run.clock).set(julieColumn, Stage.EXEC);
 		if (noOfCycles > 0) {
 			noOfCycles--;
@@ -235,7 +236,7 @@ public class Instruction {
 				break;
 			}
 		}
-		System.out.println(Helper
+		System.out.println("Hex: "+Helper
 		.decimalToHex((value1 + this.imm) & 255));
 	}
 

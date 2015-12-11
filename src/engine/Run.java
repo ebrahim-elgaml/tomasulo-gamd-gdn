@@ -3,6 +3,8 @@ package engine;
 import java.util.ArrayList;
 import java.util.Hashtable;
 
+import com.sun.xml.internal.bind.v2.runtime.unmarshaller.XsiNilLoader.Array;
+
 public class Run {
 	public static int widthSuperscaler;
 	public static int origin = -1;
@@ -18,14 +20,14 @@ public class Run {
 	// el
 	// user
 	// 3ayzha
-	ROB rob = new ROB(100 - 1);// ////Size will be give by the user
+	static ROB rob = new ROB(100 - 1);// ////Size will be give by the user
 
 	public Run(ArrayList<String> ins, int numberOfEntryROB, int memoryCycles,
 			int org, ArrayList<String> data, int cacheNumber,
 			ArrayList<Integer> cycles, ArrayList<Integer> cacheSize,
 			ArrayList<Integer> lineSize, ArrayList<Integer> associativity,
 			ArrayList<DCache.WritePolicy> dWritePolicy,
-			ArrayList<ICache.WritePolicy> iWritePolicy, int widthSuperscaler) {
+			ArrayList<ICache.WritePolicy> iWritePolicy, int widthSuperscaler, ArrayList<FunctionalUnits> f) {
 		origin = org;
 		PC = org;
 		Run.widthSuperscaler = widthSuperscaler;
@@ -38,7 +40,8 @@ public class Run {
 		MemoryHandler.initMemoryHandler(memoryCycles, org, ins, data,
 				cacheNumber, cycles, cacheSize, lineSize, associativity,
 				dWritePolicy, iWritePolicy);
-		FunctionalUnit.add(FunctionalUnits.ADDI);
+		System.out.println("costructor memory handler"+MemoryHandler.instructionCache);
+		FunctionalUnit = f;
 		InitializeScoreboard(FunctionalUnit);
 	}
 
@@ -60,21 +63,27 @@ public class Run {
 		for (int i = 0; i < registerStatus.size(); i++) {
 			registerStatus.set(i, -1);
 		}
+		printSB();
 	}
 
 	public void AlwaysRun(int numberOfInstructions) {
-		for (int i = 0; i < numberOfInstructions; i++) {
+		//for (int i = 0; i < numberOfInstructions; i++) {
+		while(true){
+			if(clock>20)
+				break;
 			for (int j = 0; j < widthSuperscaler; j++) {
 				ArrayList<Stage> julieItem = new ArrayList<Stage>();
 				for (int k = 0; k < numberOfInstructions; k++) {
 					julieItem.add(null);
 				}
 				julie.add(julieItem);
-				Instruction instruction = MemoryHandler.readInstruction(PC);
-				// System.out.println(instruction);
-				boolean fetched = Issue(instruction);
-				if (!fetched)
-					break;
+				if(PC<numberOfInstructions+origin){
+					Instruction instruction = MemoryHandler.readInstruction(PC);
+					// System.out.println(instruction);
+					boolean fetched = Issue(instruction);
+					if (!fetched)
+						break;
+				}
 			}
 			// get instructions that needs to be executed
 			ArrayList<Instruction> instructionsToExecute = needExecute();
@@ -82,10 +91,17 @@ public class Run {
 				// call method execute
 				instructionsToExecute.get(j).execute();
 			}
+			System.out.println("before need write");
+			//printSB();
+			printROB();
 			// write all instructions that needs to write
 			needWrite();
+			//printSB();
+			printROB();
 			// commit instruction that can commit
 			commit();
+			printROB();
+			//printSB();
 			System.out.println(registersFile);
 			clock++;
 		}
@@ -93,8 +109,9 @@ public class Run {
 
 	// commit all instructions that need to commit
 	public void commit() {
-		if (rob.isEmpty() || !rob.array[rob.head].ready)
+		if (rob.isEmpty() || !rob.array[rob.head].ready) {
 			return;
+		}
 		if (rob.array[rob.head].insType == Type.SW) {
 			MemoryHandler.dataCache.write(rob.array[rob.head].dest,
 					Helper.decimalToHex(rob.array[rob.head].value));
@@ -108,6 +125,7 @@ public class Run {
 				;
 			return;
 		}
+		System.out.println(rob.array[rob.head].dest);
 		registersFile.add(rob.array[rob.head].dest,
 				Helper.decimalToHex(rob.array[rob.head].value));
 		if (registerStatus.get(rob.array[rob.head].dest) == rob.head)
@@ -118,12 +136,14 @@ public class Run {
 	// check what instruction needs to write and write
 	public void needWrite() {
 		ArrayList<Integer> result = new ArrayList<Integer>();
+		System.out.println("clock :"+clock);
 		if (clock > 3) {
 			ArrayList<Stage> lastClk = julie.get(julie.size() - 1);
 
 			Type typeIns1 = null;
 			boolean write1 = false;
 			for (int i = 0; i < lastClk.size(); i++) {
+				System.out.println("MemoryHandler:"+MemoryHandler.instructionCache);
 				Instruction temp = MemoryHandler.instructionCache.read(origin
 						+ i);
 				if (result.isEmpty() && lastClk.get(i) == Stage.EXEC) {
@@ -140,11 +160,13 @@ public class Run {
 					result.add(i);
 			}
 		}
-
 		for (int i = 0; i < result.size(); i++) {
-			for (int j = 0; i < scoreboard.size(); j++) {
+			for (int j = 0; j < scoreboard.size(); j++) {
+				//System.out.println("in loop "+i+" "+j+" origin "+origin);
 				if (scoreboard.get(j).instructionAddress == i + origin) {
 					scoreboard.get(j).busy = false;
+					printROB();
+					System.out.println("j dest:"+scoreboard.get(j).destination);
 					rob.array[scoreboard.get(j).destination].ready = true;
 					rob.array[scoreboard.get(j).destination].value = Helper
 							.hexToDecimal(scoreboard.get(j).result);
@@ -187,8 +209,8 @@ public class Run {
 	public boolean Issue(Instruction I) {
 		// checking the type of the instruction
 		for (int i = 0; i < julie.size(); i++) {
-			for (int j = 0; j < julie.get(i).size(); j++)
-				System.out.print(julie.get(i).get(j));
+			for (int j = 0; j < julie.get(i).size(); j++);
+				//System.out.print(julie.get(i).get(j));
 		}
 		System.out.println("in ISSUE!");
 
@@ -198,6 +220,7 @@ public class Run {
 				PC++;
 				System.out.println("in addi!");
 				I.execute();
+				printROB();
 				return true;
 			} else {
 				return false;
@@ -276,16 +299,19 @@ public class Run {
 					RS.qj = 0;
 				} else {
 					RS.qj = ROBLOC;
-					current = new RowROB(I.type, rd, 0, false);
-					Issue = rob.push(current);
 				}
 			} else {
 				RS.vj = Integer.parseInt(registersFile.get(rs));
 				RS.qj = 0;
 			}
+			current = new RowROB(I.type, rd, 0, false);
+			RS.destination = rob.tail;
+			Issue = rob.push(current);
 			RS.busy = true;
-			RS.destination = rd;
+			System.out.println("rob tail:"+rob.tail);
+			//-1%(rob.array.length-1);
 			RS.address = offset;
+			RS.unit = FunctionalUnits.ADDI;
 			if (Issue) {
 				registerStatus.set(rd, ROBLOC);
 				RS.instructionAddress = PC;
@@ -493,11 +519,11 @@ public class Run {
 		int indx = -1;
 		for (int i = 0; i < scoreboard.size(); i++) {
 			RowScoreboard current = scoreboard.get(i);
-
-//			if(current.Type == null)
-//				current.Type = unitType.toString();
-//			if (current.Type.equals(unitType) && !current.busy) {
-
+			
+			// if(current.Type == null)
+			// current.Type = unitType.toString();
+			// if (current.Type.equals(unitType) && !current.busy) {
+			System.out.println("current unit"+current.unit+i);
 			if (current.unit.equals(unitType) && !current.busy) {
 
 				return i;
@@ -532,5 +558,25 @@ public class Run {
 	public static boolean isNegative(int Hex) {
 		return (Hex / 10 >= 8);
 
+	}
+
+	public static void printROB() {
+		System.out.println("ROB: ");
+		for (int i = 0; i < rob.array.length; ++i) {
+			if(rob.array[i]==null)
+				continue;
+			System.out.println("index of rob "+i);
+			System.out.println("Dest: " + rob.array[i].dest + " instruction: "
+					+ rob.array[i].insType + " value: " + rob.array[i].value
+					+ " ready: " + rob.array[i].ready);
+		}
+	}
+	public static void printSB(){
+		System.out.println("scoreboard");
+		for(int i=0;i<scoreboard.size();++i){
+			if(scoreboard.get(i)!=null){
+				System.out.println("i: "+i+" "+scoreboard.get(i).destination);
+			}
+		}
 	}
 }

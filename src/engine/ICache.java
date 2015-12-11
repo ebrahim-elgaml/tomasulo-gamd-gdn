@@ -45,13 +45,19 @@ public class ICache {
 	}
 
 	public ICache(int cycles, int cacheSize, int lineSize, int associativity, WritePolicy writePolicy) {
+		System.out.println("initializing sets");
 		this.cycles = cycles;
 		this.cacheSize = cacheSize;
 		this.lineSize = lineSize;
 		this.associativity = associativity;
 		this.writePolicy = writePolicy;
-		sets = new ArrayList<ArrayList<Row>>(cacheSize
-				/ (lineSize * associativity));
+		System.out.println(associativity);
+		sets = new ArrayList<ArrayList<Row>>();//(associativity);
+		for(int i =0;i<associativity;i++){
+			sets.add(new ArrayList<Row>());
+			for(int j=0;j<cacheSize/(lineSize*associativity);j++)
+				sets.get(i).add(new Row());
+		}
 		offsetSize = (int) (Math.log(lineSize) / Math.log(2));
 		indexSize = (int) (Math.log(cacheSize / (lineSize * associativity)) / Math
 				.log(2));

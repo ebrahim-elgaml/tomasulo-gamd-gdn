@@ -14,6 +14,7 @@ import javafx.stage.Stage;
 import javax.swing.JOptionPane;
 
 import engine.DCache;
+import engine.FunctionalUnits;
 import engine.ICache;
 import engine.Run;
 import engine.Type;
@@ -40,6 +41,7 @@ public class Main extends Application {
 		final ArrayList<Integer> associativity = new ArrayList<Integer>();
 		final ArrayList<DCache.WritePolicy> dWritePolicy = new ArrayList<DCache.WritePolicy>();
 		final ArrayList<ICache.WritePolicy> iWritePolicy = new ArrayList<ICache.WritePolicy>();
+		final ArrayList<FunctionalUnits> FunctionalUnit = new ArrayList<FunctionalUnits>();
 		for (int i = 0; i < cacheNumber; ++i) {
 			int cycle = Integer.parseInt(JOptionPane
 					.showInputDialog("Cache Cycle " + (i + 1)));
@@ -87,6 +89,25 @@ public class Main extends Application {
 		Run.instructionCycles.put(Type.NAND, nand);
 		int mul = Integer.parseInt(JOptionPane.showInputDialog("MUL"));
 		Run.instructionCycles.put(Type.MUL, mul);
+		
+		int lwf = Integer.parseInt(JOptionPane.showInputDialog("LW"));
+		for(int i=0;i<lwf;i++)
+			FunctionalUnit.add(FunctionalUnits.LOAD);
+		int swf = Integer.parseInt(JOptionPane.showInputDialog("SW"));
+		for(int i=0;i<swf;i++)
+			FunctionalUnit.add(FunctionalUnits.STORE);
+		int addf = Integer.parseInt(JOptionPane.showInputDialog("ADD"));
+		for(int i=0;i<addf;i++)
+			FunctionalUnit.add(FunctionalUnits.ADD);
+		int addif = Integer.parseInt(JOptionPane.showInputDialog("ADDI"));
+		for(int i=0;i<addif;i++)
+			FunctionalUnit.add(FunctionalUnits.ADDI);
+		int nandf = Integer.parseInt(JOptionPane.showInputDialog("NAND"));
+		for(int i=0;i<nandf;i++)
+			FunctionalUnit.add(FunctionalUnits.LOGICAL);
+		int mulf = Integer.parseInt(JOptionPane.showInputDialog("MUL"));
+		for(int i=0;i<mulf;i++)
+			FunctionalUnit.add(FunctionalUnits.MULTIPLY);
 
 		GridPane grid = new GridPane();
 		// grid.setAlignment(Pos.CENTER);
@@ -118,7 +139,7 @@ public class Main extends Application {
 				run = new Run(aLines, numberOfEntryROB, memoryCycles, org,
 						data, cacheNumber, cycles, cacheSize, lineSize,
 						associativity, dWritePolicy, iWritePolicy,
-						widthSuperscaler);
+						widthSuperscaler, FunctionalUnit);
 				for (int i = 0; i < lines.length; ++i) {
 					aLines.add(lines[i]);
 				}
