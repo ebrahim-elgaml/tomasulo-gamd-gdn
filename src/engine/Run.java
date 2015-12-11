@@ -54,10 +54,8 @@ public class Run {
 	// Initializing the functional units for each reservation station
 	public void InitializeScoreboard(ArrayList<FunctionalUnits> FunctionalUnits) {
 		for (int i = 0; i < FunctionalUnits.size(); i++) {
-			scoreboard
-					.add(new RowScoreboard(FunctionalUnits.get(i), false,
-							funcToType(FunctionalUnits.get(i)), -1, -1, -1, -1,
-							-1, -1));
+			scoreboard.add(new RowScoreboard(FunctionalUnits.get(i), false,
+					null, -1, -1, -1, -1, -1, -1));
 		}
 		for (int i = 0; i < registerStatus.size(); i++) {
 			registerStatus.set(i, -1);
@@ -67,10 +65,13 @@ public class Run {
 	public void AlwaysRun(int numberOfInstructions) {
 		for (int i = 0; i < numberOfInstructions; i++) {
 			for (int j = 0; j < widthSuperscaler; j++) {
-				clock++;
-				julie.add(new ArrayList<Stage>(numberOfInstructions));
+				ArrayList<Stage> julieItem = new ArrayList<Stage>();
+				for (int k = 0; k < numberOfInstructions; k++) {
+					julieItem.add(null);
+				}
+				julie.add(julieItem);
 				Instruction instruction = MemoryHandler.readInstruction(PC);
-				System.out.println(instruction);
+				// System.out.println(instruction);
 				boolean fetched = Issue(instruction);
 				if (!fetched)
 					break;
@@ -86,6 +87,7 @@ public class Run {
 			// commit instruction that can commit
 			commit();
 			System.out.println(registersFile);
+			clock++;
 		}
 	}
 
@@ -146,9 +148,9 @@ public class Run {
 					rob.array[scoreboard.get(j).destination].ready = true;
 					rob.array[scoreboard.get(j).destination].value = Helper
 							.hexToDecimal(scoreboard.get(j).result);
-					julie.get(julie.size() - 1).add(i, Stage.WRITE);
-					Instruction temp = MemoryHandler.instructionCache
-							.read(origin + i);
+					julie.get(julie.size() - 1).set(i, Stage.WRITE);
+					Instruction temp = MemoryHandler
+							.readInstruction(origin + i);
 					if (temp.type == Type.SW || temp.type == Type.BEQ)
 						rob.array[scoreboard.get(j).destination].dest = scoreboard
 								.get(j).address;
@@ -176,8 +178,7 @@ public class Run {
 		ArrayList<Instruction> result = new ArrayList<Instruction>();
 		for (int i = 0; i < scoreboard.size(); i++) {
 			if (scoreboard.get(i).qj == 0 && scoreboard.get(i).qk == 0)
-				result.add(MemoryHandler.instructionCache.read(scoreboard
-						.get(i).instructionAddress));
+				result.add(MemoryHandler.readInstruction(scoreboard.get(i).instructionAddress));
 		}
 		return result;
 	}
@@ -190,6 +191,7 @@ public class Run {
 				System.out.print(julie.get(i).get(j));
 		}
 		System.out.println("in ISSUE!");
+
 		switch (I.type) {
 		case ADDI:
 			if (HandleAdd_Immediate(I)) {
@@ -491,9 +493,13 @@ public class Run {
 		int indx = -1;
 		for (int i = 0; i < scoreboard.size(); i++) {
 			RowScoreboard current = scoreboard.get(i);
-			if(current.Type == null)
-				current.Type = unitType.toString();
-			if (current.Type.equals(unitType) && !current.busy) {
+
+//			if(current.Type == null)
+//				current.Type = unitType.toString();
+//			if (current.Type.equals(unitType) && !current.busy) {
+
+			if (current.unit.equals(unitType) && !current.busy) {
+
 				return i;
 			}
 		}

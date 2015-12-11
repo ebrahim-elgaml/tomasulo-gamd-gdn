@@ -14,6 +14,7 @@ public class RowScoreboard {
 	String result;
 	int instructionAddress;
 	public RowScoreboard(){}
+
 	public RowScoreboard(FunctionalUnits unit,boolean busy, Type op,int vj,int vk, int qj, int qk, int address,int insAdd) {
 		this.unit = unit;
 		this.busy = busy; 
