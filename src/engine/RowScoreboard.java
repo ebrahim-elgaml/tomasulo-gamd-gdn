@@ -24,10 +24,12 @@ public class RowScoreboard {
 		this.qk = qk; 
 		this.address = address;
 		this.instructionAddress = insAdd;
+		//this.Type = "";
 	}
 	
 	public RowScoreboard(boolean busy, String type, Type operation, int vj,
 			int destination,int vk, int qj, int qk, int address) {
+		this.Type = type;
 		this.busy = busy;
 		this.vj = vj;
 		this.vk = vk;

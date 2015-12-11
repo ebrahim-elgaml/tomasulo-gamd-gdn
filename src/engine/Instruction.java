@@ -235,6 +235,8 @@ public class Instruction {
 				break;
 			}
 		}
+		System.out.println(Helper
+		.decimalToHex((value1 + this.imm) & 255));
 	}
 
 	public String toString() {

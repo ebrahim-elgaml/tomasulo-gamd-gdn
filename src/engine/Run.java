@@ -189,10 +189,13 @@ public class Run {
 			for (int j = 0; j < julie.get(i).size(); j++)
 				System.out.print(julie.get(i).get(j));
 		}
+		System.out.println("in ISSUE!");
 		switch (I.type) {
 		case ADDI:
 			if (HandleAdd_Immediate(I)) {
 				PC++;
+				System.out.println("in addi!");
+				I.execute();
 				return true;
 			} else {
 				return false;
@@ -488,6 +491,8 @@ public class Run {
 		int indx = -1;
 		for (int i = 0; i < scoreboard.size(); i++) {
 			RowScoreboard current = scoreboard.get(i);
+			if(current.Type == null)
+				current.Type = unitType.toString();
 			if (current.Type.equals(unitType) && !current.busy) {
 				return i;
 			}
