@@ -12,7 +12,7 @@ public class Memory {
 		cycles = c;
 		this.base = base;
 		for (int i = 0; i < inst.size(); i++) {
-			instructions[i] = Helper.stringToInstruction(inst.get(i), i);
+			instructions[i] = Helper.stringToInstruction(inst.get(i), i +Run.origin);
 		}
 		for (int i = 0; i < d.size(); i++) {
 			data[i] = d.get(i);

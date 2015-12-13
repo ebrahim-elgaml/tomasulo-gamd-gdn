@@ -8,6 +8,7 @@ public class Run {
 	public static int origin = -1;
 	public static int PC;
 	public static int clock = 0;
+	public static int mispredicte = 0;
 	public static ArrayList<String> registersFile = new ArrayList<String>();
 	public static ArrayList<ArrayList<Stage>> julie = new ArrayList<ArrayList<Stage>>();
 	public static ArrayList<Integer> registerStatus = new ArrayList<Integer>();
@@ -125,17 +126,17 @@ public class Run {
 			rob.pop();
 			return;
 		}
-		System.out.println("PC in commit: "+ PC);
+		//System.out.println("PC in commit: "+ PC);
 		
 		if (rob.array[rob.head].insType == Type.BEQ
 				 && rob.array[rob.head].value == -300) {
-			PC = rob.array[rob.head].dest - 1;
+			PC = rob.array[rob.head].dest + 1;
 			System.out.println("PC in commit: "+ PC);
 			while (rob.pop() != null)
 				;
 			return;
 		}
-		System.out.println(rob.array[rob.head].dest);
+		//System.out.println(rob.array[rob.head].dest);
 		registersFile.set(rob.array[rob.head].dest,
 				Helper.decimalToHex(rob.array[rob.head].value));
 		if (registerStatus.get(rob.array[rob.head].dest) == rob.head)
@@ -247,7 +248,7 @@ public class Run {
 			} else
 				return false;
 		case BEQ:
-			if (HandleThreeOprands(I, FunctionalUnits.ADD)) {
+			if (HandleBranch(I)) {
 				setPC(I);
 				return true;
 			} else
@@ -304,12 +305,13 @@ public class Run {
 	}
 
 	public boolean HandleAdd_Immediate(Instruction I) {
+		Type t = I.type;
 		int reservationStationNumber = EmptyFunctionalUnit(FunctionalUnits.ADDI);
 		if (reservationStationNumber != -1) {
 			RowScoreboard RS = new RowScoreboard();
 			int rs = I.regB;
-			int rd = I.regA;
 			int offset = I.imm;
+			int rd = I.regA;
 			boolean Issue = true;
 			RowROB current;
 			int ROBLOC = registerStatus.get(rs);
@@ -320,17 +322,17 @@ public class Run {
 					RS.qj = 0;
 				} else {
 					RS.qj = ROBLOC;
+
 				}
 			} else {
 				RS.vj = Integer.parseInt(registersFile.get(rs));
 				RS.qj = 0;
+
 			}
-			current = new RowROB(I.type, rd, 0, false);
+			current = new RowROB(t, rd, 0, false);
 			RS.destination = rob.tail;
 			Issue = rob.push(current);
 			RS.busy = true;
-			System.out.println("rob tail:" + rob.tail);
-			// -1%(rob.array.length-1);
 			RS.address = offset;
 			RS.unit = FunctionalUnits.ADDI;
 			if (Issue) {
@@ -341,10 +343,10 @@ public class Run {
 				return false;
 			ArrayList<Stage> crrnt = julie.get(clock);
 			if (crrnt != null) {
-				crrnt.set(I.addressOfInstruction, Stage.ISSUE);
+				crrnt.set(I.addressOfInstruction - origin, Stage.ISSUE);
 			} else {
 				crrnt = new ArrayList<Stage>();
-				crrnt.set(I.addressOfInstruction, Stage.ISSUE);
+				crrnt.set(I.addressOfInstruction - origin, Stage.ISSUE);
 			}
 			return true;
 		}
@@ -411,10 +413,10 @@ public class Run {
 				return false;
 			ArrayList<Stage> crrnt = julie.get(clock);
 			if (crrnt != null) {
-				crrnt.set(I.addressOfInstruction, Stage.ISSUE);
+				crrnt.set(I.addressOfInstruction - origin, Stage.ISSUE);
 			} else {
 				crrnt = new ArrayList<Stage>();
-				crrnt.set(I.addressOfInstruction, Stage.ISSUE);
+				crrnt.set(I.addressOfInstruction - origin, Stage.ISSUE);
 			}
 			return true;
 
@@ -471,10 +473,69 @@ public class Run {
 				return false;
 			ArrayList<Stage> crrnt = julie.get(clock);
 			if (crrnt != null) {
-				crrnt.set(I.addressOfInstruction, Stage.ISSUE);
+				crrnt.set(I.addressOfInstruction - origin, Stage.ISSUE);
 			} else {
 				crrnt = new ArrayList<Stage>();
-				crrnt.set(I.addressOfInstruction, Stage.ISSUE);
+				crrnt.set(I.addressOfInstruction - origin, Stage.ISSUE);
+			}
+			return true;
+		} else
+			return false;
+	}
+
+	// special case of issuing Store
+	public boolean HandleBranch(Instruction I) {
+		int reservationStationNumber = EmptyFunctionalUnit(FunctionalUnits.ADD);
+		if (reservationStationNumber != -1) {
+			RowScoreboard RS = new RowScoreboard();
+			int rd = I.regA;
+			int offset = I.imm;
+			int rs = I.regB;
+			RowROB current;
+			int ROBLOC = registerStatus.get(rs);
+			if (registerStatus.get(rs) != -1) {
+				if (rob.getArray()[ROBLOC] != null
+						&& rob.getArray()[ROBLOC].ready) {
+					RS.vk = rob.getArray()[ROBLOC].value;
+					RS.qk = 0;
+				} else {
+					RS.qk = ROBLOC;
+				}
+			} else {
+				RS.vk = Integer.parseInt(registersFile.get(rs));
+				RS.qk = 0;
+			}
+			// / setting for register containing the address
+			ROBLOC = registerStatus.get(rd);
+			if (registerStatus.get(rd) != -1) {
+				if (rob.getArray()[ROBLOC] != null
+						&& rob.getArray()[ROBLOC].ready) {
+					RS.vj = rob.getArray()[ROBLOC].value;
+					RS.qj = 0;
+				} else {
+					RS.qj = ROBLOC;
+				}
+			} else {
+				RS.vj = Integer.parseInt(registersFile.get(rd));
+				RS.qj = 0;
+			}
+
+			current = new RowROB(Type.BEQ, offset, -1, false);
+			RS.destination = rob.tail;
+			RS.unit=FunctionalUnits.ADD;
+			RS.busy = true;
+			if (rob.push(current)) {
+				RS.instructionAddress = PC;
+				
+				scoreboard.set(reservationStationNumber, RS);
+			} else
+				return false;
+			ArrayList<Stage> crrnt = julie.get(clock);
+			if (crrnt != null) {
+				crrnt.set(I.addressOfInstruction - origin, Stage.ISSUE);
+			} else {
+				crrnt = new ArrayList<Stage>();
+				crrnt.set(I.addressOfInstruction - origin, Stage.ISSUE);
 			}
 			return true;
 		} else
@@ -485,10 +546,11 @@ public class Run {
 	public boolean HandleThreeOprands(Instruction I, FunctionalUnits f) {
 		int reservationStationNumber = EmptyFunctionalUnit(f);
 		if (reservationStationNumber != -1) {
+			int rd = 0;
 			RowScoreboard RS = new RowScoreboard();
 			int rs = I.regB;
 			int rt = I.imm;
-			int rd = I.regA;
+			rd = I.regA;
 			RowROB current;
 			int ROBLOC = registerStatus.get(rt);
 			// / setting for register second operand
@@ -530,10 +592,10 @@ public class Run {
 				return false;
 			ArrayList<Stage> crrnt = julie.get(clock);
 			if (crrnt != null) {
-				crrnt.set(I.addressOfInstruction, Stage.ISSUE);
+				crrnt.set(I.addressOfInstruction - origin, Stage.ISSUE);
 			} else {
 				crrnt = new ArrayList<Stage>();
-				crrnt.set(I.addressOfInstruction, Stage.ISSUE);
+				crrnt.set(I.addressOfInstruction - origin, Stage.ISSUE);
 			}
 			return true;
 		} else

@@ -143,6 +143,7 @@ public class Instruction {
 				if (Run.scoreboard.get(i).instructionAddress == this.addressOfInstruction) {
 					Run.scoreboard.get(i).address = addressOfInstruction + 1;
 					Run.scoreboard.get(i).result = "false";
+					Run.mispredicte++;
 					break;
 				}
 			}
