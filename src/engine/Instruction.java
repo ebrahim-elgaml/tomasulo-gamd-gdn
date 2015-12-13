@@ -228,6 +228,8 @@ public class Instruction {
 			noOfCycles--;
 			return;
 		}
+		if(noOfCycles<0)
+			return;
 		int value1 = Helper.hexToDecimal(Run.registersFile.get(regB));
 		for (int i = 0; i < Run.scoreboard.size(); i++) {
 			if (Run.scoreboard.get(i).instructionAddress == this.addressOfInstruction) {

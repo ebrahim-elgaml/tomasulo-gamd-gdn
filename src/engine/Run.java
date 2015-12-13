@@ -69,7 +69,7 @@ public class Run {
 	public void AlwaysRun(int numberOfInstructions) {
 		//for (int i = 0; i < numberOfInstructions; i++) {
 		while(true){
-			if(clock>20)
+			if(clock>12)
 				break;
 			for (int j = 0; j < widthSuperscaler; j++) {
 				ArrayList<Stage> julieItem = new ArrayList<Stage>();
@@ -160,6 +160,7 @@ public class Run {
 					result.add(i);
 			}
 		}
+		System.out.println("result size"+result.size());
 		for (int i = 0; i < result.size(); i++) {
 			for (int j = 0; j < scoreboard.size(); j++) {
 				//System.out.println("in loop "+i+" "+j+" origin "+origin);
@@ -199,7 +200,7 @@ public class Run {
 	public ArrayList<Instruction> needExecute() {
 		ArrayList<Instruction> result = new ArrayList<Instruction>();
 		for (int i = 0; i < scoreboard.size(); i++) {
-			if (scoreboard.get(i).qj == 0 && scoreboard.get(i).qk == 0)
+			if (scoreboard.get(i).qj == 0 && scoreboard.get(i).qk == 0&&scoreboard.get(i).busy==true)
 				result.add(MemoryHandler.readInstruction(scoreboard.get(i).instructionAddress));
 		}
 		return result;
