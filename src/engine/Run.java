@@ -3,8 +3,6 @@ package engine;
 import java.util.ArrayList;
 import java.util.Hashtable;
 
-import com.sun.xml.internal.bind.v2.runtime.unmarshaller.XsiNilLoader.Array;
-
 public class Run {
 	public static int widthSuperscaler;
 	public static int origin = -1;
@@ -70,7 +68,7 @@ public class Run {
 		//for (int i = 0; i < numberOfInstructions; i++) {
 		
 		while(true){
-			if(clock>20)
+			if(clock>1200)
 				break;
 			ArrayList<Stage> julieItem = new ArrayList<Stage>();
 			for(int i=0;i<numberOfInstructions;++i)
@@ -81,6 +79,7 @@ public class Run {
 				//for (int k = 0; k < numberOfInstructions; k++) {
 				//}
 				//julie.add(julieItem);
+				System.out.println("PC=" + PC);
 				if(PC<numberOfInstructions+origin){
 					Instruction instruction = MemoryHandler.readInstruction(PC);
 					// System.out.println(instruction);
@@ -115,6 +114,7 @@ public class Run {
 
 	// commit all instructions that need to commit
 	public void commit() {
+		//rob.array[0].ready = true;
 		if (rob.isEmpty() || !rob.array[rob.head].ready) {
 			return;
 		}
@@ -125,18 +125,21 @@ public class Run {
 			rob.pop();
 			return;
 		}
+		System.out.println("PC in commit: "+ PC);
+		
 		if (rob.array[rob.head].insType == Type.BEQ
-				&& rob.array[rob.head].value == -300) {
-			PC = rob.array[rob.head].dest;
+				 && rob.array[rob.head].value == -300) {
+			PC = rob.array[rob.head].dest - 1;
+			System.out.println("PC in commit: "+ PC);
 			while (rob.pop() != null)
 				;
 			return;
 		}
 		System.out.println(rob.array[rob.head].dest);
-		registersFile.add(rob.array[rob.head].dest,
+		registersFile.set(rob.array[rob.head].dest,
 				Helper.decimalToHex(rob.array[rob.head].value));
 		if (registerStatus.get(rob.array[rob.head].dest) == rob.head)
-			registerStatus.add(rob.head, -1);
+			registerStatus.set(rob.head, -1);
 		rob.pop();
 	}
 
@@ -144,7 +147,7 @@ public class Run {
 	public void needWrite() {
 		ArrayList<Integer> result = new ArrayList<Integer>();
 		System.out.println("clock :"+clock);
-		if (clock > 3) {
+		if (clock > 1) {
 			ArrayList<Stage> lastClk = julie.get(julie.size() - 1);
 			System.out.println("last clk:"+lastClk);
 			Type typeIns1 = null;
@@ -174,7 +177,7 @@ public class Run {
 				if (scoreboard.get(j).instructionAddress == result.get(i) + origin) {
 					scoreboard.get(j).busy = false;
 					printROB();
-					System.out.println("j dest:"+scoreboard.get(j).destination);
+					System.out.println("j dest:"+scoreboard.get(j).destination +", "+ result.get(i) +origin);
 					rob.array[scoreboard.get(j).destination].ready = true;
 					rob.array[scoreboard.get(j).destination].value = Helper
 							.hexToDecimal(scoreboard.get(j).result);
@@ -185,13 +188,13 @@ public class Run {
 						rob.array[scoreboard.get(j).destination].dest = scoreboard
 								.get(j).address;
 					for (int k = 0; k < scoreboard.size(); k++) {
-						if (scoreboard.get(k).qj == scoreboard.get(k).address
+						if (scoreboard.get(k).qj == scoreboard.get(k).destination
 								&& scoreboard.get(k).busy) {
 							scoreboard.get(k).qj = 0;
 							scoreboard.get(k).vj = Helper
 									.hexToDecimal(scoreboard.get(k).result);
 						}
-						if (scoreboard.get(k).qk == scoreboard.get(k).address
+						if (scoreboard.get(k).qk == scoreboard.get(k).destination
 								&& scoreboard.get(k).busy) {
 							scoreboard.get(k).qk = 0;
 							scoreboard.get(k).vk = Helper

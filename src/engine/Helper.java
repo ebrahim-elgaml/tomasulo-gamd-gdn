@@ -33,6 +33,8 @@ public class Helper {
 	public static int hexToDecimal(String hex) {
 		if (hex.equals("false"))
 			return -300;
+		if (hex.equals("true"))
+			return -400;
 		int result = 0;
 		for (int i = 0; i < hex.length(); i++) {
 			String character = hex.charAt(i) + "";
@@ -106,7 +108,7 @@ public class Helper {
 		imm = regB = -100;
 		regA = Integer.parseInt(inst[1].substring(1));
 		if (inst.length >= 4) {
-			if (t == Type.ADDI || t == Type.SW || t == Type.LW) {
+			if (t == Type.ADDI || t == Type.SW || t == Type.LW || t == Type.BEQ) {
 				regB = Integer.parseInt(inst[2].substring(1));
 				imm = Integer.parseInt(inst[3]);
 			} else {
@@ -114,10 +116,12 @@ public class Helper {
 				imm = Integer.parseInt(inst[3].substring(1));
 			}
 		} else if (inst.length == 3) {
-//			jmp r0 2
-//			addi r1 r1 5
-//			addi r2 r2 4
-//			addi r3 r3 6
+/*
+addi r1 r1 5
+beq r1 r1 1
+addi r2 r2 10
+addi r3 r3 17
+*/
 			if (t == Type.JMP) {
 				imm = Integer.parseInt(inst[2]);
 			} else {

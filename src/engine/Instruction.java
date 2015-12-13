@@ -128,12 +128,12 @@ public class Instruction {
 		}
 		String value1 = Run.registersFile.get(regA);
 		String value2 = Run.registersFile.get(regB);
-		if (value1.equals(value2)) {
+		if (value1.equals(value2) && imm < 0 || !value1.equals(value2)
+				&& imm > 0) {
 			for (int i = 0; i < Run.scoreboard.size(); i++) {
 				if (Run.scoreboard.get(i).instructionAddress == this.addressOfInstruction) {
 					Run.scoreboard.get(i).result = "true";
-					Run.scoreboard.get(i).address = addressOfInstruction + 1
-							+ imm;
+					Run.scoreboard.get(i).address = addressOfInstruction + imm + 1;
 					break;
 				}
 			}
@@ -228,7 +228,7 @@ public class Instruction {
 			noOfCycles--;
 			return;
 		}
-		if(noOfCycles<0)
+		if (noOfCycles < 0)
 			return;
 		int value1 = Helper.hexToDecimal(Run.registersFile.get(regB));
 		for (int i = 0; i < Run.scoreboard.size(); i++) {
@@ -238,8 +238,8 @@ public class Instruction {
 				break;
 			}
 		}
-		System.out.println("Hex: "+Helper
-		.decimalToHex((value1 + this.imm) & 255));
+		System.out.println("Hex: "
+				+ Helper.decimalToHex((value1 + this.imm) & 255));
 	}
 
 	public String toString() {
