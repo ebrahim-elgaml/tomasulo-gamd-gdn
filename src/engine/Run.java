@@ -69,7 +69,7 @@ public class Run {
 	public void AlwaysRun(int numberOfInstructions) {
 		//for (int i = 0; i < numberOfInstructions; i++) {
 		while(true){
-			if(clock>12)
+			if(clock>20)
 				break;
 			for (int j = 0; j < widthSuperscaler; j++) {
 				ArrayList<Stage> julieItem = new ArrayList<Stage>();
@@ -81,8 +81,10 @@ public class Run {
 					Instruction instruction = MemoryHandler.readInstruction(PC);
 					// System.out.println(instruction);
 					boolean fetched = Issue(instruction);
-					if (!fetched)
+					System.out.println("fetched?"+ fetched+" "+ instruction.addressOfInstruction);
+					if (!fetched){
 						break;
+					}
 				}
 			}
 			// get instructions that needs to be executed
@@ -139,7 +141,7 @@ public class Run {
 		System.out.println("clock :"+clock);
 		if (clock > 3) {
 			ArrayList<Stage> lastClk = julie.get(julie.size() - 1);
-
+			System.out.println("last clk:"+lastClk);
 			Type typeIns1 = null;
 			boolean write1 = false;
 			for (int i = 0; i < lastClk.size(); i++) {
@@ -158,13 +160,13 @@ public class Run {
 				} else if (result.size() == 1 && typeIns1 == Type.SW && !write1
 						&& temp.noOfCycles == 0 && lastClk.get(i) == Stage.EXEC)
 					result.add(i);
-			}
+			};
 		}
 		System.out.println("result size"+result.size());
 		for (int i = 0; i < result.size(); i++) {
 			for (int j = 0; j < scoreboard.size(); j++) {
 				//System.out.println("in loop "+i+" "+j+" origin "+origin);
-				if (scoreboard.get(j).instructionAddress == i + origin) {
+				if (scoreboard.get(j).instructionAddress == result.get(i) + origin) {
 					scoreboard.get(j).busy = false;
 					printROB();
 					System.out.println("j dest:"+scoreboard.get(j).destination);
@@ -563,6 +565,7 @@ public class Run {
 
 	public static void printROB() {
 		System.out.println("ROB: ");
+		System.out.println(rob.head);
 		for (int i = 0; i < rob.array.length; ++i) {
 			if(rob.array[i]==null)
 				continue;

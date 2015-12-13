@@ -67,7 +67,7 @@ public class Main extends Application {
 		final int widthSuperscaler = Integer.parseInt(JOptionPane
 				.showInputDialog("Supersalar width"));
 
-		int lw = Integer.parseInt(JOptionPane.showInputDialog("LW"));
+		int lw = Integer.parseInt(JOptionPane.showInputDialog("LW CYCLES"));
 		Run.instructionCycles.put(Type.LW, lw);
 		int sw = Integer.parseInt(JOptionPane.showInputDialog("SW"));
 		Run.instructionCycles.put(Type.SW, sw);
@@ -90,7 +90,7 @@ public class Main extends Application {
 		int mul = Integer.parseInt(JOptionPane.showInputDialog("MUL"));
 		Run.instructionCycles.put(Type.MUL, mul);
 		
-		int lwf = Integer.parseInt(JOptionPane.showInputDialog("LW"));
+		int lwf = Integer.parseInt(JOptionPane.showInputDialog("LW UNITS"));
 		for(int i=0;i<lwf;i++)
 			FunctionalUnit.add(FunctionalUnits.LOAD);
 		int swf = Integer.parseInt(JOptionPane.showInputDialog("SW"));
