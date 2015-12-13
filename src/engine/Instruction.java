@@ -8,6 +8,7 @@ public class Instruction {
 	int indexOfInstruction;
 	int addressOfInstruction;
 	int noOfCycles;
+	boolean last;
 
 	public Instruction(Type t, int addressOfInstruction, int rA, int rB, int imm) {
 		this.addressOfInstruction = addressOfInstruction;
@@ -17,6 +18,11 @@ public class Instruction {
 		this.regB = rB;
 		this.imm = imm;
 		this.noOfCycles = Run.instructionCycles.get(t);
+		//System.out.println(addressOfInstruction+" "+(Run.number-1)+" arff");
+		if(addressOfInstruction==(Run.number-1))
+			last= true;
+		else
+			last = false;
 	}
 
 	public Type getType() {

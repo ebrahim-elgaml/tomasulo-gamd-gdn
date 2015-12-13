@@ -16,6 +16,8 @@ public class Run {
 	public static ArrayList<RowScoreboard> scoreboard = new ArrayList<RowScoreboard>();
 	public static Hashtable<Type, Integer> instructionCycles = new Hashtable<Type, Integer>();
 	public static ArrayList<FunctionalUnits> FunctionalUnit = new ArrayList<FunctionalUnits>();// /had5ol
+	public static int number = 0;
+	public static boolean finished = false;
 	// mn
 	// el
 	// user
@@ -29,6 +31,7 @@ public class Run {
 			ArrayList<DCache.WritePolicy> dWritePolicy,
 			ArrayList<ICache.WritePolicy> iWritePolicy, int widthSuperscaler,
 			ArrayList<FunctionalUnits> f) {
+		number = ins.size();
 		origin = org;
 		PC = org;
 		Run.widthSuperscaler = widthSuperscaler;
@@ -70,10 +73,12 @@ public class Run {
 
 	public void AlwaysRun(int numberOfInstructions) {
 		// for (int i = 0; i < numberOfInstructions; i++) {
-
+		//number = numberOfInstructions;
+		System.out.println(number);
 		while (true) {
-			if (clock > 30)
-				break;
+			if (PC>numberOfInstructions+origin&&finished){
+				System.out.println("IPC: "+(numberOfInstructions/clock));
+				break;}
 			ArrayList<Stage> julieItem = new ArrayList<Stage>();
 			for (int i = 0; i < numberOfInstructions; ++i)
 				julieItem.add(null);
@@ -93,26 +98,29 @@ public class Run {
 						break;
 					}
 				}
+				// get instructions that needs to be executed
+				ArrayList<Instruction> instructionsToExecute = needExecute();
+				for (int k = 0; k < instructionsToExecute.size(); k++) {
+					// call method execute
+					instructionsToExecute.get(k).execute();
+				}
+				System.out.println("before need write");
+				// printSB();
+				// printROB();
+				// write all instructions that needs to write
+				needWrite();
+				// printSB();
+				// printROB();
+				// commit instruction that can commit
+				commit();
+				// printROB();
+				// printSB();
+
 			}
-			// get instructions that needs to be executed
-			ArrayList<Instruction> instructionsToExecute = needExecute();
-			for (int j = 0; j < instructionsToExecute.size(); j++) {
-				// call method execute
-				instructionsToExecute.get(j).execute();
-			}
-			System.out.println("before need write");
-			// printSB();
-			printROB();
-			// write all instructions that needs to write
-			needWrite();
-			// printSB();
-			printROB();
-			// commit instruction that can commit
-			commit();
-			printROB();
-			// printSB();
+			System.out.println("clock at this time: "+clock);
 			System.out.println(registersFile);
 			clock++;
+			
 		}
 	}
 
@@ -125,6 +133,8 @@ public class Run {
 			MemoryHandler.writeData(rob.array[rob.head].dest,
 					Helper.decimalToHex(rob.array[rob.head].value));
 			// System.out.println("read data: "+MemoryHandler.readData(0));
+			if(rob.array[rob.head].last==true)
+				finished = true;
 			rob.pop();
 			return;
 		}
@@ -133,6 +143,8 @@ public class Run {
 			PC = rob.array[rob.head].dest;
 			while (rob.pop() != null)
 				;
+			if(rob.array[rob.head].last==true)
+			  finished = true;
 			return;
 		}
 		System.out.println(rob.array[rob.head].dest);
@@ -140,6 +152,8 @@ public class Run {
 				Helper.decimalToHex(rob.array[rob.head].value));
 		if (registerStatus.get(rob.array[rob.head].dest) == rob.head)
 			registerStatus.set(rob.head, -1);
+		if(rob.array[rob.head].last==true)
+			finished = true;
 		rob.pop();
 	}
 
@@ -191,7 +205,7 @@ public class Run {
 						rob.array[scoreboard.get(j).destination].dest = scoreboard
 								.get(j).address;
 					for (int k = 0; k < scoreboard.size(); k++) {
-						if (scoreboard.get(k).qj == scoreboard.get(k).destination //.address
+						if (scoreboard.get(k).qj == scoreboard.get(k).destination // .address
 								&& scoreboard.get(k).busy) {
 							scoreboard.get(k).qj = 0;
 							scoreboard.get(k).vj = Helper
@@ -326,7 +340,8 @@ public class Run {
 				RS.vj = Integer.parseInt(registersFile.get(rs));
 				RS.qj = 0;
 			}
-			current = new RowROB(I.type, rd, 0, false);
+			System.out.println("i last"+I.last);
+			current = new RowROB(I.type, rd, 0, false,I.last);
 			RS.destination = rob.tail;
 			Issue = rob.push(current);
 			RS.busy = true;
@@ -398,7 +413,7 @@ public class Run {
 				RS.qj = 0;
 
 			}
-			current = new RowROB(t, rd, 0, false);
+			current = new RowROB(t, rd, 0, false,I.last);
 			RS.destination = rob.tail;
 			Issue = rob.push(current);
 			RS.busy = true;
@@ -460,9 +475,9 @@ public class Run {
 				RS.qj = 0;
 			}
 
-			current = new RowROB(Type.SW, 0, 0, false);
+			current = new RowROB(Type.SW, 0, 0, false,I.last);
 			RS.destination = rob.tail;
-			RS.unit=FunctionalUnits.STORE;
+			RS.unit = FunctionalUnits.STORE;
 			RS.busy = true;
 			RS.address = offset;
 			if (rob.push(current)) {
@@ -521,7 +536,7 @@ public class Run {
 			}
 			RS.busy = true;
 			RS.unit = typeFinder(I.type);
-			current = new RowROB(I.type, rd, 0, false);
+			current = new RowROB(I.type, rd, 0, false,I.last);
 			RS.destination = rob.tail;
 			if (rob.push(current)) {
 				RS.instructionAddress = PC;

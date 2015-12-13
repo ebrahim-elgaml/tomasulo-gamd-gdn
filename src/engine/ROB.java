@@ -31,7 +31,7 @@ public class ROB {
 	public boolean push(RowROB row) {
 		if ((head == 0 && tail == array.length - 1) || head - tail == 1) 
 			return false;
-		array[tail] = new RowROB(row.insType,row.dest, row.value,row.ready);
+		array[tail] = new RowROB(row.insType,row.dest, row.value,row.ready,row.last);
 		tail ++; 
 		if(tail == array.length) 
 			tail = array.length -1; 
