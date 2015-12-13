@@ -18,8 +18,10 @@ public class MemoryHandler {
 			ArrayList<ICache.WritePolicy> iWritePolicy) {
 		memory = new Memory(memoryCycles, org, instructions, data);
 		DCache.memory = memory;
-		dataCache = new DCache(cycles.get(0), cacheSize.get(0), lineSize.get(0), associativity.get(0),
-				 dWritePolicy.get(0)); 
+		if (cacheNumber > 0) {
+			dataCache = new DCache(cycles.get(0), cacheSize.get(0),
+					lineSize.get(0), associativity.get(0), dWritePolicy.get(0));
+		}
 		DCache currentCache = dataCache;
 		for (int i = 1; i < cacheNumber; ++i) {
 			currentCache.next = new DCache(cycles.get(i), cacheSize.get(i),
@@ -27,8 +29,10 @@ public class MemoryHandler {
 			currentCache = currentCache.next;
 		}
 		ICache.memory = memory;
-		instructionCache = new ICache(cycles.get(0), cacheSize.get(0), lineSize.get(0), associativity.get(0),
-				 iWritePolicy.get(0));
+		if (cacheNumber > 0) {
+			instructionCache = new ICache(cycles.get(0), cacheSize.get(0),
+					lineSize.get(0), associativity.get(0), iWritePolicy.get(0));
+		}
 		ICache currentCache1 = instructionCache;
 		for (int i = 1; i < cacheNumber; ++i) {
 			currentCache1.next = new ICache(cycles.get(i), cacheSize.get(i),
@@ -49,8 +53,10 @@ public class MemoryHandler {
 	public static void writeData(int address, String data) {
 		DCache.time = 0;
 		if (dataCache != null) {
+			System.out.println("data added");
 			dataCache.write(address, data);
 		} else {
+			System.out.println("data added");
 			memory.storeData(address, data);
 		}
 	}

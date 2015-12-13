@@ -16,6 +16,7 @@ import javax.swing.JOptionPane;
 import engine.DCache;
 import engine.FunctionalUnits;
 import engine.ICache;
+import engine.MemoryHandler;
 import engine.Run;
 import engine.Type;
 
@@ -153,6 +154,8 @@ public class Main extends Application {
 			@Override
 			public void handle(ActionEvent arg0) {
 				run.AlwaysRun(lines.length);
+//				MemoryHandler.writeData(0, "05");
+//				System.out.println(MemoryHandler.readData(0));
 			}
 		});
 

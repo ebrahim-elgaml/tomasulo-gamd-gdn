@@ -51,8 +51,16 @@ public class DCache {
 		this.lineSize = lineSize;
 		this.associativity = associativity;
 		this.writePolicy = writePolicy;
-		sets = new ArrayList<ArrayList<Row>>(cacheSize
-				/ (lineSize * associativity));
+		//sets = new ArrayList<ArrayList<Row>>(cacheSize
+			//	/ (lineSize * associativity));
+		sets = new ArrayList<ArrayList<Row>>();
+		System.out.print("size:"+(cacheSize)/(lineSize*associativity));
+		for(int i=0;i<(cacheSize)/(lineSize*associativity);++i){
+			sets.add(new ArrayList<Row>());
+			System.out.println(sets.size());
+			for(int j =0;j<cacheSize/lineSize;++j)
+				sets.get(i).add(new Row());
+		}
 		offsetSize = (int) (Math.log(lineSize) / Math.log(2));
 		indexSize = (int) (Math.log(cacheSize / (lineSize * associativity)) / Math
 				.log(2));
@@ -114,7 +122,7 @@ public class DCache {
 				row.data = data;
 				return;
 			}
-		}
+		}//24149091
 		if (set.get(0).dirty) {
 			int oldAddress = set.get(0).tag << (indexSize + offsetSize);
 			if (next != null) {

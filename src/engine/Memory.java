@@ -3,8 +3,8 @@ package engine;
 import java.util.ArrayList;
 
 public class Memory {
-	public ArrayList<Instruction> instructions = new ArrayList<Instruction>();
-	public ArrayList<String> data = new ArrayList<String>();
+	public static Instruction instructions[] = new Instruction[65536];
+	public static String data[] = new String[65536];
 	int cycles;
 	int base;
 
@@ -12,22 +12,24 @@ public class Memory {
 		cycles = c;
 		this.base = base;
 		for (int i = 0; i < inst.size(); i++) {
-			instructions.add(Helper.stringToInstruction(inst.get(i), i));
+			instructions[i] = Helper.stringToInstruction(inst.get(i), i);
 		}
 		for (int i = 0; i < d.size(); i++) {
-			data.add(d.get(i));
+			data[i] = d.get(i);
 		}
 	}
 
 	public void storeData(int index, String d) {
-		data.add(index - base, d);
+		System.out.println("data added");
+		data[index - base] = d;
+		System.out.println("data:" + (index - base) + " " + data[index - base]);
 	}
 
 	public Instruction loadInstruction(int index) {
-		return instructions.get(index - base);
+		return instructions[index - base];
 	}
 
 	public String loadData(int index) {
-		return data.get(index - base);
+		return data[index - base];
 	}
 }

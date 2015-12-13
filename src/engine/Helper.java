@@ -106,7 +106,7 @@ public class Helper {
 		imm = regB = -100;
 		regA = Integer.parseInt(inst[1].substring(1));
 		if (inst.length >= 4) {
-			if (t == Type.ADDI) {
+			if (t == Type.ADDI || t == Type.SW || t == Type.LW) {
 				regB = Integer.parseInt(inst[2].substring(1));
 				imm = Integer.parseInt(inst[3]);
 			} else {

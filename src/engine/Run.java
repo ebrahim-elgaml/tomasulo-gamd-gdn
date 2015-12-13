@@ -119,7 +119,7 @@ public class Run {
 			return;
 		}
 		if (rob.array[rob.head].insType == Type.SW) {
-			MemoryHandler.dataCache.write(rob.array[rob.head].dest,
+			MemoryHandler.writeData(rob.array[rob.head].dest,
 					Helper.decimalToHex(rob.array[rob.head].value));
 			rob.pop();
 			return;
@@ -150,7 +150,7 @@ public class Run {
 			boolean write1 = false;
 			for (int i = 0; i < lastClk.size(); i++) {
 				System.out.println("MemoryHandler:"+MemoryHandler.instructionCache);
-				Instruction temp = MemoryHandler.instructionCache.read(origin
+				Instruction temp = MemoryHandler.readInstruction(origin
 						+ i);
 				if (result.isEmpty() && lastClk.get(i) == Stage.EXEC) {
 					if (temp.noOfCycles == 0) {
@@ -385,11 +385,12 @@ public class Run {
 				RS.qj = 0;
 			}
 			RS.busy = true;
-			RS.destination = rob.tail;
 			RS.address = offset;
+			RS.unit = FunctionalUnits.LOAD;
 			if (Issue) {
 				registerStatus.set(rd, ROBLOC);
 				RS.instructionAddress = PC;
+				RS.destination = rob.tail;
 				scoreboard.set(reservationStationNumber, RS);
 			} else
 				return false;
