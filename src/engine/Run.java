@@ -375,24 +375,24 @@ public class Run {
 						&& rob.getArray()[ROBLOC].ready) {
 					RS.vj = rob.getArray()[ROBLOC].value;
 					RS.qj = 0;
-					current = new RowROB(t, rd, 0, false);
-					Issue = rob.push(current);
 				} else {
 					RS.qj = ROBLOC;
-					current = new RowROB(t, rd, 0, false);
-					Issue = rob.push(current);
+					
 				}
 			} else {
 				RS.vj = Integer.parseInt(registersFile.get(rs));
 				RS.qj = 0;
+				
 			}
+			current = new RowROB(t, rd, 0, false);
+			RS.destination = rob.tail;
+			Issue = rob.push(current);
 			RS.busy = true;
 			RS.address = offset;
 			RS.unit = FunctionalUnits.LOAD;
 			if (Issue) {
 				registerStatus.set(rd, ROBLOC);
 				RS.instructionAddress = PC;
-				RS.destination = rob.tail;
 				scoreboard.set(reservationStationNumber, RS);
 			} else
 				return false;
