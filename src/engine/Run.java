@@ -68,15 +68,19 @@ public class Run {
 
 	public void AlwaysRun(int numberOfInstructions) {
 		//for (int i = 0; i < numberOfInstructions; i++) {
+		
 		while(true){
 			if(clock>20)
 				break;
+			ArrayList<Stage> julieItem = new ArrayList<Stage>();
+			for(int i=0;i<numberOfInstructions;++i)
+				julieItem.add(null);
+			julie.add(julieItem);
 			for (int j = 0; j < widthSuperscaler; j++) {
-				ArrayList<Stage> julieItem = new ArrayList<Stage>();
-				for (int k = 0; k < numberOfInstructions; k++) {
-					julieItem.add(null);
-				}
-				julie.add(julieItem);
+				
+				//for (int k = 0; k < numberOfInstructions; k++) {
+				//}
+				//julie.add(julieItem);
 				if(PC<numberOfInstructions+origin){
 					Instruction instruction = MemoryHandler.readInstruction(PC);
 					// System.out.println(instruction);
@@ -381,7 +385,7 @@ public class Run {
 				RS.qj = 0;
 			}
 			RS.busy = true;
-			RS.destination = rd;
+			RS.destination = rob.tail;
 			RS.address = offset;
 			if (Issue) {
 				registerStatus.set(rd, ROBLOC);
@@ -440,6 +444,7 @@ public class Run {
 			}
 
 			current = new RowROB(Type.SW, 0, 0, false);
+			RS.destination = rob.tail;
 			RS.busy = true;
 			RS.address = offset;
 			if (rob.push(current)) {
@@ -497,6 +502,8 @@ public class Run {
 				RS.qj = 0;
 			}
 			RS.busy = true;
+			RS.destination = rob.tail;
+			RS.unit = typeFinder(I.type);
 			current = new RowROB(I.type, rd, 0, false);
 			if (rob.push(current)) {
 				RS.instructionAddress = PC;
@@ -581,6 +588,20 @@ public class Run {
 			if(scoreboard.get(i)!=null){
 				System.out.println("i: "+i+" "+scoreboard.get(i).destination);
 			}
+		}
+	}
+	public static FunctionalUnits typeFinder(Type t){
+		//LW, SW, JMP, BEQ, JALR, RET, ADD, SUB, ADDI, NAND, MUL
+		switch(t){
+		case LW:return FunctionalUnits.LOAD;
+		case SW:return FunctionalUnits.STORE;
+		case ADD:return FunctionalUnits.ADD;
+		case SUB:return FunctionalUnits.ADD;
+		case ADDI:return FunctionalUnits.ADDI;
+		case NAND:return FunctionalUnits.LOGICAL;
+		case MUL:return FunctionalUnits.MULTIPLY;
+		case BEQ:return FunctionalUnits.ADD;
+		default: return null;
 		}
 	}
 }
