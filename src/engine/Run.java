@@ -27,7 +27,8 @@ public class Run {
 			ArrayList<Integer> cycles, ArrayList<Integer> cacheSize,
 			ArrayList<Integer> lineSize, ArrayList<Integer> associativity,
 			ArrayList<DCache.WritePolicy> dWritePolicy,
-			ArrayList<ICache.WritePolicy> iWritePolicy, int widthSuperscaler, ArrayList<FunctionalUnits> f) {
+			ArrayList<ICache.WritePolicy> iWritePolicy, int widthSuperscaler,
+			ArrayList<FunctionalUnits> f) {
 		origin = org;
 		PC = org;
 		Run.widthSuperscaler = widthSuperscaler;
@@ -40,7 +41,8 @@ public class Run {
 		MemoryHandler.initMemoryHandler(memoryCycles, org, ins, data,
 				cacheNumber, cycles, cacheSize, lineSize, associativity,
 				dWritePolicy, iWritePolicy);
-		System.out.println("costructor memory handler"+MemoryHandler.instructionCache);
+		System.out.println("costructor memory handler"
+				+ MemoryHandler.instructionCache);
 		FunctionalUnit = f;
 		InitializeScoreboard(FunctionalUnit);
 	}
@@ -67,26 +69,27 @@ public class Run {
 	}
 
 	public void AlwaysRun(int numberOfInstructions) {
-		//for (int i = 0; i < numberOfInstructions; i++) {
-		
-		while(true){
-			if(clock>20)
+		// for (int i = 0; i < numberOfInstructions; i++) {
+
+		while (true) {
+			if (clock > 30)
 				break;
 			ArrayList<Stage> julieItem = new ArrayList<Stage>();
-			for(int i=0;i<numberOfInstructions;++i)
+			for (int i = 0; i < numberOfInstructions; ++i)
 				julieItem.add(null);
 			julie.add(julieItem);
 			for (int j = 0; j < widthSuperscaler; j++) {
-				
-				//for (int k = 0; k < numberOfInstructions; k++) {
-				//}
-				//julie.add(julieItem);
-				if(PC<numberOfInstructions+origin){
+
+				// for (int k = 0; k < numberOfInstructions; k++) {
+				// }
+				// julie.add(julieItem);
+				if (PC < numberOfInstructions + origin) {
 					Instruction instruction = MemoryHandler.readInstruction(PC);
 					// System.out.println(instruction);
 					boolean fetched = Issue(instruction);
-					System.out.println("fetched?"+ fetched+" "+ instruction.addressOfInstruction);
-					if (!fetched){
+					System.out.println("fetched?" + fetched + " "
+							+ instruction.addressOfInstruction);
+					if (!fetched) {
 						break;
 					}
 				}
@@ -98,16 +101,16 @@ public class Run {
 				instructionsToExecute.get(j).execute();
 			}
 			System.out.println("before need write");
-			//printSB();
+			// printSB();
 			printROB();
 			// write all instructions that needs to write
 			needWrite();
-			//printSB();
+			// printSB();
 			printROB();
 			// commit instruction that can commit
 			commit();
 			printROB();
-			//printSB();
+			// printSB();
 			System.out.println(registersFile);
 			clock++;
 		}
@@ -121,7 +124,7 @@ public class Run {
 		if (rob.array[rob.head].insType == Type.SW) {
 			MemoryHandler.writeData(rob.array[rob.head].dest,
 					Helper.decimalToHex(rob.array[rob.head].value));
-			//System.out.println("read data: "+MemoryHandler.readData(0));
+			// System.out.println("read data: "+MemoryHandler.readData(0));
 			rob.pop();
 			return;
 		}
@@ -143,16 +146,16 @@ public class Run {
 	// check what instruction needs to write and write
 	public void needWrite() {
 		ArrayList<Integer> result = new ArrayList<Integer>();
-		System.out.println("clock :"+clock);
+		System.out.println("clock :" + clock);
 		if (clock > 3) {
 			ArrayList<Stage> lastClk = julie.get(julie.size() - 1);
-			System.out.println("last clk:"+lastClk);
+			System.out.println("last clk:" + lastClk);
 			Type typeIns1 = null;
 			boolean write1 = false;
 			for (int i = 0; i < lastClk.size(); i++) {
-				System.out.println("MemoryHandler:"+MemoryHandler.instructionCache);
-				Instruction temp = MemoryHandler.readInstruction(origin
-						+ i);
+				System.out.println("MemoryHandler:"
+						+ MemoryHandler.instructionCache);
+				Instruction temp = MemoryHandler.readInstruction(origin + i);
 				if (result.isEmpty() && lastClk.get(i) == Stage.EXEC) {
 					if (temp.noOfCycles == 0) {
 						result.add(i);
@@ -165,16 +168,19 @@ public class Run {
 				} else if (result.size() == 1 && typeIns1 == Type.SW && !write1
 						&& temp.noOfCycles == 0 && lastClk.get(i) == Stage.EXEC)
 					result.add(i);
-			};
+			}
+			;
 		}
-		System.out.println("result size"+result.size());
+		System.out.println("result size" + result.size());
 		for (int i = 0; i < result.size(); i++) {
 			for (int j = 0; j < scoreboard.size(); j++) {
-				//System.out.println("in loop "+i+" "+j+" origin "+origin);
-				if (scoreboard.get(j).instructionAddress == result.get(i) + origin) {
+				// System.out.println("in loop "+i+" "+j+" origin "+origin);
+				if (scoreboard.get(j).instructionAddress == result.get(i)
+						+ origin) {
 					scoreboard.get(j).busy = false;
 					printROB();
-					System.out.println("j dest:"+scoreboard.get(j).destination);
+					System.out.println("j dest:"
+							+ scoreboard.get(j).destination);
 					rob.array[scoreboard.get(j).destination].ready = true;
 					rob.array[scoreboard.get(j).destination].value = Helper
 							.hexToDecimal(scoreboard.get(j).result);
@@ -185,13 +191,13 @@ public class Run {
 						rob.array[scoreboard.get(j).destination].dest = scoreboard
 								.get(j).address;
 					for (int k = 0; k < scoreboard.size(); k++) {
-						if (scoreboard.get(k).qj == scoreboard.get(k).address
+						if (scoreboard.get(k).qj == scoreboard.get(k).destination //.address
 								&& scoreboard.get(k).busy) {
 							scoreboard.get(k).qj = 0;
 							scoreboard.get(k).vj = Helper
 									.hexToDecimal(scoreboard.get(k).result);
 						}
-						if (scoreboard.get(k).qk == scoreboard.get(k).address
+						if (scoreboard.get(k).qk == scoreboard.get(k).destination
 								&& scoreboard.get(k).busy) {
 							scoreboard.get(k).qk = 0;
 							scoreboard.get(k).vk = Helper
@@ -207,7 +213,8 @@ public class Run {
 	public ArrayList<Instruction> needExecute() {
 		ArrayList<Instruction> result = new ArrayList<Instruction>();
 		for (int i = 0; i < scoreboard.size(); i++) {
-			if (scoreboard.get(i).qj == 0 && scoreboard.get(i).qk == 0&&scoreboard.get(i).busy==true)
+			if (scoreboard.get(i).qj == 0 && scoreboard.get(i).qk == 0
+					&& scoreboard.get(i).busy == true)
 				result.add(MemoryHandler.readInstruction(scoreboard.get(i).instructionAddress));
 		}
 		return result;
@@ -217,8 +224,9 @@ public class Run {
 	public boolean Issue(Instruction I) {
 		// checking the type of the instruction
 		for (int i = 0; i < julie.size(); i++) {
-			for (int j = 0; j < julie.get(i).size(); j++);
-				//System.out.print(julie.get(i).get(j));
+			for (int j = 0; j < julie.get(i).size(); j++)
+				;
+			// System.out.print(julie.get(i).get(j));
 		}
 		System.out.println("in ISSUE!");
 
@@ -258,6 +266,12 @@ public class Run {
 		case RET:
 			return HandleReturn(I);
 		case ADD:
+			if (HandleThreeOprands(I, FunctionalUnits.ADD)) {
+				PC++;
+				return true;
+			} else
+				return false;
+		case SUB:
 			if (HandleThreeOprands(I, FunctionalUnits.ADD)) {
 				PC++;
 				return true;
@@ -316,8 +330,8 @@ public class Run {
 			RS.destination = rob.tail;
 			Issue = rob.push(current);
 			RS.busy = true;
-			System.out.println("rob tail:"+rob.tail);
-			//-1%(rob.array.length-1);
+			System.out.println("rob tail:" + rob.tail);
+			// -1%(rob.array.length-1);
 			RS.address = offset;
 			RS.unit = FunctionalUnits.ADDI;
 			if (Issue) {
@@ -377,12 +391,12 @@ public class Run {
 					RS.qj = 0;
 				} else {
 					RS.qj = ROBLOC;
-					
+
 				}
 			} else {
 				RS.vj = Integer.parseInt(registersFile.get(rs));
 				RS.qj = 0;
-				
+
 			}
 			current = new RowROB(t, rd, 0, false);
 			RS.destination = rob.tail;
@@ -507,8 +521,8 @@ public class Run {
 			RS.busy = true;
 			RS.unit = typeFinder(I.type);
 			current = new RowROB(I.type, rd, 0, false);
+			RS.destination = rob.tail;
 			if (rob.push(current)) {
-				RS.destination = rob.tail;
 				RS.instructionAddress = PC;
 				registerStatus.set(rd, ROBLOC);
 				scoreboard.set(reservationStationNumber, RS);
@@ -532,11 +546,11 @@ public class Run {
 		int indx = -1;
 		for (int i = 0; i < scoreboard.size(); i++) {
 			RowScoreboard current = scoreboard.get(i);
-			
+
 			// if(current.Type == null)
 			// current.Type = unitType.toString();
 			// if (current.Type.equals(unitType) && !current.busy) {
-			System.out.println("current unit"+current.unit+i);
+			System.out.println("current unit" + current.unit + i);
 			if (current.unit.equals(unitType) && !current.busy) {
 
 				return i;
@@ -577,34 +591,46 @@ public class Run {
 		System.out.println("ROB: ");
 		System.out.println(rob.head);
 		for (int i = 0; i < rob.array.length; ++i) {
-			if(rob.array[i]==null)
+			if (rob.array[i] == null)
 				continue;
-			System.out.println("index of rob "+i);
+			System.out.println("index of rob " + i);
 			System.out.println("Dest: " + rob.array[i].dest + " instruction: "
 					+ rob.array[i].insType + " value: " + rob.array[i].value
 					+ " ready: " + rob.array[i].ready);
 		}
 	}
-	public static void printSB(){
+
+	public static void printSB() {
 		System.out.println("scoreboard");
-		for(int i=0;i<scoreboard.size();++i){
-			if(scoreboard.get(i)!=null){
-				System.out.println("i: "+i+" "+scoreboard.get(i).destination);
+		for (int i = 0; i < scoreboard.size(); ++i) {
+			if (scoreboard.get(i) != null) {
+				System.out.println("i: " + i + " "
+						+ scoreboard.get(i).destination);
 			}
 		}
 	}
-	public static FunctionalUnits typeFinder(Type t){
-		//LW, SW, JMP, BEQ, JALR, RET, ADD, SUB, ADDI, NAND, MUL
-		switch(t){
-		case LW:return FunctionalUnits.LOAD;
-		case SW:return FunctionalUnits.STORE;
-		case ADD:return FunctionalUnits.ADD;
-		case SUB:return FunctionalUnits.ADD;
-		case ADDI:return FunctionalUnits.ADDI;
-		case NAND:return FunctionalUnits.LOGICAL;
-		case MUL:return FunctionalUnits.MULTIPLY;
-		case BEQ:return FunctionalUnits.ADD;
-		default: return null;
+
+	public static FunctionalUnits typeFinder(Type t) {
+		// LW, SW, JMP, BEQ, JALR, RET, ADD, SUB, ADDI, NAND, MUL
+		switch (t) {
+		case LW:
+			return FunctionalUnits.LOAD;
+		case SW:
+			return FunctionalUnits.STORE;
+		case ADD:
+			return FunctionalUnits.ADD;
+		case SUB:
+			return FunctionalUnits.ADD;
+		case ADDI:
+			return FunctionalUnits.ADDI;
+		case NAND:
+			return FunctionalUnits.LOGICAL;
+		case MUL:
+			return FunctionalUnits.MULTIPLY;
+		case BEQ:
+			return FunctionalUnits.ADD;
+		default:
+			return null;
 		}
 	}
 }
