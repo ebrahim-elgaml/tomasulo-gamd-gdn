@@ -6,6 +6,8 @@ public class DCache {
 	int cacheSize;
 	int lineSize;
 	int associativity;
+	int hit;
+	int miss;
 	WritePolicy writePolicy;
 
 	DCache next;
@@ -78,12 +80,15 @@ public class DCache {
 		for (int i = 0; i < set.size(); ++i) {
 			Row row = set.get(i);
 			if (row.tag == tag) {
+				hit++;
 				return row.data.substring(2 * offset, 2 * (offset + 1));
 			}
 		}
 		if (next != null) {
+			miss++;
 			return next.read(address);
 		}
+		miss++;
 		return memory.loadData(address);
 	}
 	public int readCycles(int address) {

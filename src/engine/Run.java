@@ -76,8 +76,63 @@ public class Run {
 		//number = numberOfInstructions;
 		System.out.println(number);
 		while (true) {
-			if (PC>numberOfInstructions+origin&&finished){
-				System.out.println("IPC: "+(numberOfInstructions/clock));
+			if (finished){
+				System.out.println("IPC: "+(double)(numberOfInstructions/clock));
+				ICache current = MemoryHandler.instructionCache;
+				DCache currentD = MemoryHandler.dataCache;
+				int dcache = 1;
+				int icache =1;
+				MemoryHandler.Ghit = 0;
+				MemoryHandler.Gmiss = 0;
+				double amat = 0;
+				double acc =1;
+				boolean first = true;
+				while(current!=null){
+					if(first){
+						
+						amat+=current.cycles;}
+					if(current.next!=null&&!first){
+						acc *=(double)(current.miss/(current.miss+current.hit));
+						amat+=acc*current.next.cycles;
+					}
+					else if(current.next==null){
+						acc *=(double)(current.miss/(current.miss+current.hit));
+						amat+=acc*MemoryHandler.memory.cycles;
+					}
+					if(first)
+						first=!first;
+					System.out.println("Cache"+icache+": Hits: "+current.hit+" Miss: "+current.miss);
+					MemoryHandler.Ghit+=current.hit;
+					MemoryHandler.Gmiss+=current.miss;
+					current = current.next;
+					icache++;
+				}
+				while(currentD!=null){
+					if(first){
+						
+						amat+=current.cycles;}
+					if(currentD.next!=null&&!first){
+						if(currentD.miss!=0&&currentD.hit!=0)
+						acc *=(double)(currentD.miss/(currentD.miss+currentD.hit));
+						amat+=acc*currentD.next.cycles;
+					}
+					else if(currentD.next==null){
+						if(currentD.miss!=0&&currentD.hit!=0)
+						acc *=(double)(currentD.miss/(currentD.miss+currentD.hit));
+						amat+=acc*MemoryHandler.memory.cycles;
+					}
+					if(first)
+						first=!first;
+					System.out.println("Cache"+icache+": Hits: "+currentD.hit+" Miss: "+currentD.miss);
+					MemoryHandler.Ghit+=currentD.hit;
+					MemoryHandler.Gmiss+=currentD.miss;
+					currentD = currentD.next;
+					dcache++;
+				}
+				System.out.println("AMAT: "+amat);
+				
+				//hit time + miss rate x miss penalty
+				
 				break;}
 			ArrayList<Stage> julieItem = new ArrayList<Stage>();
 			for (int i = 0; i < numberOfInstructions; ++i)

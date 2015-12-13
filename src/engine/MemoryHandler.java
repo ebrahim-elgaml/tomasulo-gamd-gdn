@@ -8,8 +8,8 @@ public class MemoryHandler {
 	public static Memory memory;
 	static DCache dataCache;
 	static ICache instructionCache;
-	public static int hit=0;
-	public static int miss=0;
+	public static int Ghit=0;
+	public static int Gmiss=0;
 
 	public static void initMemoryHandler(int memoryCycles, int org,
 			ArrayList<String> instructions, ArrayList<String> data,

@@ -6,6 +6,8 @@ public class ICache {
 	int cacheSize;
 	int lineSize;
 	int associativity;
+	int hit;
+	int miss;
 	Type type;
 	WritePolicy writePolicy;
 
@@ -62,6 +64,8 @@ public class ICache {
 		indexSize = (int) (Math.log(cacheSize / (lineSize * associativity)) / Math
 				.log(2));
 		tagSize = 16 - offsetSize - indexSize;
+		hit =0;
+		miss = 0 ;
 	}
 
 	public Instruction read(int address) {
@@ -75,13 +79,16 @@ public class ICache {
 		for (int i = 0; i < set.size(); ++i) {
 			Row row = set.get(i);
 			if (row.tag == tag) {
+				hit++;
 				return Helper.stringToInstruction(row.data.substring(2 * offset, 2 * (offset + 1)),address);
 			}
 		}
 		if (next != null) {
+			miss++;
 			return next.read(address);
 		}
 		// return new Pair<>(memory.loadData(address), time + memory.cycles);
+		miss++;
 		return memory.loadInstruction(address);
 	}
 	public int readCycles(int address) {
