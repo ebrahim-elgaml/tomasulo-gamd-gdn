@@ -94,7 +94,7 @@ public class Helper {
 		for (int i = 0; i < s.length(); i++) {
 			sRev += s.charAt(i);
 		}
-		return sRev;
+		return (sRev.length()>1)?sRev:"0"+sRev;
 	}
 
 	public static Instruction stringToInstruction(String s,

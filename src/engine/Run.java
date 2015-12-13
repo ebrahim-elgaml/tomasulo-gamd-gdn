@@ -121,6 +121,7 @@ public class Run {
 		if (rob.array[rob.head].insType == Type.SW) {
 			MemoryHandler.writeData(rob.array[rob.head].dest,
 					Helper.decimalToHex(rob.array[rob.head].value));
+			//System.out.println("read data: "+MemoryHandler.readData(0));
 			rob.pop();
 			return;
 		}
@@ -360,8 +361,7 @@ public class Run {
 	// Assuming ScoreBoard Contains Hexadecimal value
 	public boolean HandleLoad_Immediate(Instruction I) {
 		Type t = I.type;
-		int reservationStationNumber = (t.equals(Type.LW)) ? EmptyFunctionalUnit(FunctionalUnits.LOAD)
-				: EmptyFunctionalUnit(FunctionalUnits.ADD);
+		int reservationStationNumber = EmptyFunctionalUnit(FunctionalUnits.LOAD);
 		if (reservationStationNumber != -1) {
 			RowScoreboard RS = new RowScoreboard();
 			int rs = I.regB;
@@ -375,6 +375,8 @@ public class Run {
 						&& rob.getArray()[ROBLOC].ready) {
 					RS.vj = rob.getArray()[ROBLOC].value;
 					RS.qj = 0;
+					current = new RowROB(t, rd, 0, false);
+					Issue = rob.push(current);
 				} else {
 					RS.qj = ROBLOC;
 					current = new RowROB(t, rd, 0, false);
@@ -503,10 +505,10 @@ public class Run {
 				RS.qj = 0;
 			}
 			RS.busy = true;
-			RS.destination = rob.tail;
 			RS.unit = typeFinder(I.type);
 			current = new RowROB(I.type, rd, 0, false);
 			if (rob.push(current)) {
+				RS.destination = rob.tail;
 				RS.instructionAddress = PC;
 				registerStatus.set(rd, ROBLOC);
 				scoreboard.set(reservationStationNumber, RS);
