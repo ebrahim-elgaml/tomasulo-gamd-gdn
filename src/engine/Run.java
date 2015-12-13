@@ -136,10 +136,10 @@ public class Run {
 			return;
 		}
 		System.out.println(rob.array[rob.head].dest);
-		registersFile.add(rob.array[rob.head].dest,
+		registersFile.set(rob.array[rob.head].dest,
 				Helper.decimalToHex(rob.array[rob.head].value));
 		if (registerStatus.get(rob.array[rob.head].dest) == rob.head)
-			registerStatus.add(rob.head, -1);
+			registerStatus.set(rob.head, -1);
 		rob.pop();
 	}
 
@@ -462,6 +462,7 @@ public class Run {
 
 			current = new RowROB(Type.SW, 0, 0, false);
 			RS.destination = rob.tail;
+			RS.unit=FunctionalUnits.STORE;
 			RS.busy = true;
 			RS.address = offset;
 			if (rob.push(current)) {

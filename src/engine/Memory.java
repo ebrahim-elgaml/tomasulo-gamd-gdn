@@ -17,6 +17,8 @@ public class Memory {
 		for (int i = 0; i < d.size(); i++) {
 			data[i] = d.get(i);
 		}
+		for(int i=0;i<data.length;i++)
+			data[i]="00";
 	}
 
 	public void storeData(int index, String d) {

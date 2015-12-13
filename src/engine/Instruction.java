@@ -97,6 +97,7 @@ public class Instruction {
 		for (int i = 0; i < Run.scoreboard.size(); i++) {
 			if (Run.scoreboard.get(i).instructionAddress == this.addressOfInstruction) {
 				Run.scoreboard.get(i).result = MemoryHandler.readData(address);
+				System.out.println("data read by load="+MemoryHandler.readData(address));
 				Run.scoreboard.get(i).address = address;
 				break;
 			}
