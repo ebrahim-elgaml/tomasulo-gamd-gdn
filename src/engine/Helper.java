@@ -94,7 +94,7 @@ public class Helper {
 		for (int i = 0; i < s.length(); i++) {
 			sRev += s.charAt(i);
 		}
-		return (sRev.length()>1)?sRev:"0"+sRev;
+		return (sRev.length() > 1) ? sRev : "0" + sRev;
 	}
 
 	public static Instruction stringToInstruction(String s,
@@ -114,7 +114,15 @@ public class Helper {
 				imm = Integer.parseInt(inst[3].substring(1));
 			}
 		} else if (inst.length == 3) {
-			regB = Integer.parseInt(inst[2].substring(1));
+//			jmp r0 2
+//			addi r1 r1 5
+//			addi r2 r2 4
+//			addi r3 r3 6
+			if (t == Type.JMP) {
+				imm = Integer.parseInt(inst[2]);
+			} else {
+				regB = Integer.parseInt(inst[2].substring(1));
+			}
 		}
 		return new Instruction(t, addressOfInstruction, regA, regB, imm);
 	}
